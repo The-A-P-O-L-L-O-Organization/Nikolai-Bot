@@ -1,0 +1,38 @@
+services:
+  bot:
+    build: .
+    container_name: nikolai-bot
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/nikolai
+    volumes:
+      - ./backups:/app/backups
+    networks:
+      - nikolai-network
+
+  mongodb:
+    image: mongo:7
+    container_name: nikolai-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - nikolai-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mongo_data:
+
+networks:
+  nikolai-network:
+    driver: bridge

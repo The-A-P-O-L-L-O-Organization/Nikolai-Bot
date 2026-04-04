@@ -1,0 +1,30 @@
+{
+  "name": "nikolai-bot",
+  "version": "1.0.0",
+  "description": "A comprehensive NRP (Nation Roleplay) management bot for Discord",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "nrp",
+    "nation",
+    "roleplay"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "mongoose": "^8.2.0",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
