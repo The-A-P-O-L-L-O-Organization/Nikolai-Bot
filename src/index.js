@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Events } from 'discord.js';
 import mongoose from 'mongoose';
 import config from './config.js';
 import { loadCommands, registerCommands } from './handlers/commandHandler.js';
@@ -7,6 +7,13 @@ import { startTurnScheduler } from './systems/turnProcessor.js';
 import { initializeGameState } from './database/models/GameState.js';
 import { initializeDefaultResources } from './database/models/Resource.js';
 import { initializeDefaultUnits } from './database/models/Unit.js';
+
+// Suppress known deprecation warnings (discord.js ephemeral deprecation)
+const originalWarn = process.emitWarning;
+process.emitWarning = (warning, ...args) => {
+  if (typeof warning === 'string' && warning.includes('ephemeral')) return;
+  originalWarn.call(process, warning, ...args);
+};
 
 // Create Discord client
 const client = new Client({
@@ -62,7 +69,7 @@ async function start() {
     await client.login(config.discord.token);
 
     // Start turn scheduler after bot is ready
-    client.once('ready', () => {
+    client.once(Events.ClientReady, () => {
       console.log(`✅ Logged in as ${client.user.tag}`);
       startTurnScheduler(client);
       console.log(`⏰ Turn scheduler started (every ${config.bot.turnIntervalHours} hours)`);

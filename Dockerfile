@@ -2,9 +2,12 @@ FROM node:24-alpine
 
 WORKDIR /app
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Install dependencies first for better caching
-COPY package*.json ./
-RUN npm ci --only=production
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile --prod || pnpm install --prod
 
 # Copy source code
 COPY . .

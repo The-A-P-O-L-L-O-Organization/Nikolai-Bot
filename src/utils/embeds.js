@@ -1,5 +1,10 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import config from '../config.js';
+
+/**
+ * Ephemeral flag for replies (discord.js v14.15+ deprecation fix)
+ */
+export const EPHEMERAL = { flags: MessageFlags.Ephemeral };
 import { formatNumber, formatPercentage, formatCurrency, formatDate, formatRelativeTime } from './formatters.js';
 
 /**

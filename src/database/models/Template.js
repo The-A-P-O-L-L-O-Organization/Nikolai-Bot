@@ -69,7 +69,7 @@ const templateSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-templateSchema.index({ name: 1 });
+// name already indexed via unique: true
 templateSchema.index({ tier: 1 });
 
 const Template = mongoose.model('Template', templateSchema);

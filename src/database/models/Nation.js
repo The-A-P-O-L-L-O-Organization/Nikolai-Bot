@@ -136,8 +136,7 @@ nationSchema.pre('save', function(next) {
   next();
 });
 
-// Index for faster lookups
-nationSchema.index({ name: 1 });
+// Index for faster lookups (name already indexed via unique: true)
 nationSchema.index({ owner: 1 });
 
 const Nation = mongoose.model('Nation', nationSchema);

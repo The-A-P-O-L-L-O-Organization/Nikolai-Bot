@@ -34,7 +34,7 @@ const unitSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-unitSchema.index({ name: 1 });
+// name already indexed via unique: true
 unitSchema.index({ category: 1 });
 
 const Unit = mongoose.model('Unit', unitSchema);

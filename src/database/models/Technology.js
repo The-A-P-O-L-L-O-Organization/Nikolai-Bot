@@ -34,7 +34,7 @@ const technologySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-technologySchema.index({ name: 1 });
+// name already indexed via unique: true
 technologySchema.index({ category: 1 });
 
 const Technology = mongoose.model('Technology', technologySchema);

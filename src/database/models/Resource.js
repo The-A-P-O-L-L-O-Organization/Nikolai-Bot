@@ -14,7 +14,7 @@ const resourceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-resourceSchema.index({ name: 1 });
+// name already indexed via unique: true
 resourceSchema.index({ type: 1 });
 
 const Resource = mongoose.model('Resource', resourceSchema);
