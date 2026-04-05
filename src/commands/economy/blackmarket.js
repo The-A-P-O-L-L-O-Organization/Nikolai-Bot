@@ -162,7 +162,7 @@ async function handleList(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${sellerName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, seller);
+  const canModify = await canModifyNation(interaction.member, seller);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only list items from nations you own')], ephemeral: true });
   }
@@ -270,7 +270,7 @@ async function handleBuy(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${buyerName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, buyer);
+  const canModify = await canModifyNation(interaction.member, buyer);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only buy with nations you own')], ephemeral: true });
   }
@@ -369,7 +369,7 @@ async function handleCancel(interaction) {
   if (listing.seller) {
     const seller = await Nation.findById(listing.seller);
     if (seller) {
-      const canModify = await canModifyNation(interaction, seller);
+      const canModify = await canModifyNation(interaction.member, seller);
       if (!canModify) {
         const gm = await isGM(interaction);
         if (!gm) {
@@ -398,7 +398,7 @@ async function handleHistory(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only view history for nations you own')], ephemeral: true });
   }

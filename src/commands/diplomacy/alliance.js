@@ -191,7 +191,7 @@ async function handleCreate(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${leaderName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, leader);
+  const canModify = await canModifyNation(interaction.member, leader);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only create alliances with nations you own')], ephemeral: true });
   }
@@ -268,7 +268,7 @@ async function handleInvite(interaction) {
   // Check if inviter is leader
   const leader = await Nation.findById(alliance.leader);
   if (leader) {
-    const canModify = await canModifyNation(interaction, leader);
+    const canModify = await canModifyNation(interaction.member, leader);
     if (!canModify) {
       const gm = await isGM(interaction);
       if (!gm) {
@@ -310,7 +310,7 @@ async function handleJoin(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only join alliances with nations you own')], ephemeral: true });
   }
@@ -381,7 +381,7 @@ async function handleLeave(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only leave alliances with nations you own')], ephemeral: true });
   }
@@ -435,7 +435,7 @@ async function handleKick(interaction) {
   // Check if requester is leader
   const leader = await Nation.findById(alliance.leader);
   if (leader) {
-    const canModify = await canModifyNation(interaction, leader);
+    const canModify = await canModifyNation(interaction.member, leader);
     if (!canModify) {
       const gm = await isGM(interaction);
       if (!gm) {
@@ -569,7 +569,7 @@ async function handleDissolve(interaction) {
   if (alliance.leader) {
     const leader = await Nation.findById(alliance.leader);
     if (leader) {
-      authorized = await canModifyNation(interaction, leader);
+      authorized = await canModifyNation(interaction.member, leader);
     }
   }
   
@@ -629,7 +629,7 @@ async function handleTerms(interaction) {
   // Check if leader
   const leader = await Nation.findById(alliance.leader);
   if (leader) {
-    const canModify = await canModifyNation(interaction, leader);
+    const canModify = await canModifyNation(interaction.member, leader);
     if (!canModify) {
       const gm = await isGM(interaction);
       if (!gm) {

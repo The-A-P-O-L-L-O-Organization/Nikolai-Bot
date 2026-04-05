@@ -167,7 +167,7 @@ async function handleImpose(interaction) {
     return interaction.reply({ embeds: [errorEmbed('Cannot sanction yourself')], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, fromNation);
+  const canModify = await canModifyNation(interaction.member, fromNation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only impose sanctions from nations you own')], ephemeral: true });
   }
@@ -257,7 +257,7 @@ async function handleLift(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${fromName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, fromNation);
+  const canModify = await canModifyNation(interaction.member, fromNation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only lift sanctions from nations you own')], ephemeral: true });
   }
@@ -309,7 +309,7 @@ async function handleJoin(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only join sanctions with nations you own')], ephemeral: true });
   }
@@ -364,7 +364,7 @@ async function handleLeave(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only leave sanctions with nations you own')], ephemeral: true });
   }

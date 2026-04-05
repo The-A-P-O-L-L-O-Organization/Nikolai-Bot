@@ -146,7 +146,7 @@ async function handleLaunch(interaction) {
   
   // Check permissions (counterintelligence is the only type that targets self)
   if (type !== 'counterintelligence') {
-    const canModify = await canModifyNation(interaction, nation);
+    const canModify = await canModifyNation(interaction.member, nation);
     if (!canModify) {
       return interaction.reply({ embeds: [errorEmbed('You can only launch operations from nations you own')], ephemeral: true });
     }
@@ -240,7 +240,7 @@ async function handleView(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only view operations for nations you own')], ephemeral: true });
   }
@@ -289,7 +289,7 @@ async function handleAbort(interaction) {
   // Check ownership
   const nation = await Nation.findById(operation.operator);
   if (nation) {
-    const canModify = await canModifyNation(interaction, nation);
+    const canModify = await canModifyNation(interaction.member, nation);
     if (!canModify) {
       return interaction.reply({ embeds: [errorEmbed('You can only abort your own operations')], ephemeral: true });
     }
@@ -410,7 +410,7 @@ async function handleHistory(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   const gm = await isGM(interaction);
   
   if (!canModify && !gm) {

@@ -162,7 +162,7 @@ async function handlePropose(interaction) {
   }
   
   // Check permissions
-  const canModify = await canModifyNation(interaction, fromNation);
+  const canModify = await canModifyNation(interaction.member, fromNation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only propose trades from nations you own')], ephemeral: true });
   }
@@ -241,7 +241,7 @@ async function handleAccept(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only accept trades for nations you own')], ephemeral: true });
   }
@@ -306,7 +306,7 @@ async function handleReject(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only reject trades for nations you own')], ephemeral: true });
   }
@@ -345,7 +345,7 @@ async function handleCancel(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Nation "${nationName}" not found`)], ephemeral: true });
   }
   
-  const canModify = await canModifyNation(interaction, nation);
+  const canModify = await canModifyNation(interaction.member, nation);
   if (!canModify) {
     return interaction.reply({ embeds: [errorEmbed('You can only cancel trades involving nations you own')], ephemeral: true });
   }

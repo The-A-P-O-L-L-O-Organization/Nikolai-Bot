@@ -151,7 +151,7 @@ export async function execute(interaction) {
       const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
       if (!nation) return interaction.reply({ embeds: [errorEmbed('Nation not found')], ephemeral: true });
       
-      const canModify = await canModifyNation(interaction, nation);
+      const canModify = await canModifyNation(interaction.member, nation);
       if (!canModify) return interaction.reply({ embeds: [errorEmbed('You can only join with nations you own')], ephemeral: true });
       
       const isMember = council.members.some(m => m.nation.equals(nation._id));
@@ -174,7 +174,7 @@ export async function execute(interaction) {
       const sponsor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${sponsorName}$`, 'i') } });
       if (!sponsor) return interaction.reply({ embeds: [errorEmbed('Sponsor nation not found')], ephemeral: true });
       
-      const canModify = await canModifyNation(interaction, sponsor);
+      const canModify = await canModifyNation(interaction.member, sponsor);
       if (!canModify) return interaction.reply({ embeds: [errorEmbed('You can only sponsor resolutions with nations you own')], ephemeral: true });
       
       const isMember = council.members.some(m => m.nation.equals(sponsor._id));
@@ -216,7 +216,7 @@ export async function execute(interaction) {
       const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
       if (!nation) return interaction.reply({ embeds: [errorEmbed('Nation not found')], ephemeral: true });
       
-      const canModify = await canModifyNation(interaction, nation);
+      const canModify = await canModifyNation(interaction.member, nation);
       if (!canModify) return interaction.reply({ embeds: [errorEmbed('You can only vote with nations you own')], ephemeral: true });
       
       const isMember = council.members.some(m => m.nation.equals(nation._id) && m.role !== 'suspended');
@@ -254,7 +254,7 @@ export async function execute(interaction) {
       const isSecurityMember = council.securityCouncil.some(s => s.nation.equals(nation._id));
       if (!isSecurityMember) return interaction.reply({ embeds: [errorEmbed('Only Security Council permanent members can veto')], ephemeral: true });
       
-      const canModify = await canModifyNation(interaction, nation);
+      const canModify = await canModifyNation(interaction.member, nation);
       if (!canModify) return interaction.reply({ embeds: [errorEmbed('You can only veto with nations you own')], ephemeral: true });
       
       const resolution = await Resolution.findOne({ guildId, number: resNumber });
