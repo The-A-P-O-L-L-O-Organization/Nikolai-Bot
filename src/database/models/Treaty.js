@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 
 const treatySchema = new mongoose.Schema({
+  // Guild (server) this treaty belongs to
+  guildId: { type: String, required: true, index: true },
+  
   name: { type: String, required: true },
   type: { 
     type: String, 

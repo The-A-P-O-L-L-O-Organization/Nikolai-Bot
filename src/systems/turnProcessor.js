@@ -18,15 +18,15 @@ export function startTurnScheduler(client) {
   // Run check every minute to see if a turn should process
   scheduledJob = cron.schedule('* * * * *', async () => {
     try {
-      const gameState = await getGameState();
-      if (!gameState) return;
-
+      // Get all game states that need processing
       const now = new Date();
-      const nextProcessing = gameState.turn.nextProcessing;
+      const gameStates = await GameState.find({
+        'turn.nextProcessing': { $lte: now }
+      });
 
-      if (nextProcessing && now >= nextProcessing) {
-        console.log('⏰ Automatic turn processing triggered');
-        const result = await processTurn(client);
+      for (const gameState of gameStates) {
+        console.log(`Processing turn for guild ${gameState.guildId}`);
+        const result = await processTurn(client, gameState.guildId);
         
         // Announce in channel if configured
         if (gameState.settings.turnAnnouncementChannel) {
@@ -36,7 +36,7 @@ export function startTurnScheduler(client) {
               await channel.send({ embeds: [turnSummaryEmbed(result.turnNumber, result.year, result.changes)] });
             }
           } catch (err) {
-            console.error('Failed to announce turn:', err);
+            console.error(`Failed to announce turn for guild ${gameState.guildId}:`, err);
           }
         }
       }
@@ -59,10 +59,10 @@ export function stopTurnScheduler() {
 }
 
 /**
- * Process a single turn
+ * Process a single turn for a specific guild
  */
-export async function processTurn(client) {
-  const gameState = await getGameState();
+export async function processTurn(client, guildId) {
+  const gameState = await getGameState(guildId);
   const turnNumber = (gameState?.turn?.current || 0) + 1;
   
   const changes = {
@@ -74,8 +74,8 @@ export async function processTurn(client) {
     spirits: [],
   };
 
-  // Get all nations
-  const nations = await Nation.find();
+  // Get all nations for this guild
+  const nations = await Nation.find({ guildId });
 
   for (const nation of nations) {
     // Calculate spirit modifiers for this nation
@@ -215,8 +215,8 @@ export async function processTurn(client) {
   // Process random events (if enabled)
   const eventChance = gameState?.settings?.randomEventChance ?? 15;
   if (eventChance > 0) {
-    const reloadedNations = await Nation.find();
-    const triggeredEvents = await processEventsForTurn(reloadedNations, eventChance);
+    const reloadedNations = await Nation.find({ guildId });
+    const triggeredEvents = await processEventsForTurn(reloadedNations, eventChance, guildId);
     
     for (const { nation, event } of triggeredEvents) {
       changes.events.push(`${nation.name}: ${event.name} (${event.severity})`);
@@ -246,7 +246,7 @@ export async function processTurn(client) {
     ? gameState.year + (gameState.settings?.yearPerTurn || 1)
     : gameState.year;
 
-  await updateGameState({
+  await updateGameState(guildId, {
     year: newYear,
     'turn.current': turnNumber,
     'turn.lastProcessed': new Date(),
@@ -255,6 +255,7 @@ export async function processTurn(client) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Turn',
     action: 'update',

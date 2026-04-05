@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
 const technologySchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
+  // Guild (server) this technology belongs to (null for global defaults)
+  guildId: { type: String, default: null, index: true },
+  
+  name: { type: String, required: true },
   category: { 
     type: String, 
     enum: ['military', 'economy', 'infrastructure', 'science', 'social', 'special'], 

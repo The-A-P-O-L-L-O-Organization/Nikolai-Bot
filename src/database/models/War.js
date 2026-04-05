@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 
 const warSchema = new mongoose.Schema({
+  // Guild (server) this war belongs to
+  guildId: { type: String, required: true, index: true },
+  
   name: { type: String, required: true },
   
   // Belligerents

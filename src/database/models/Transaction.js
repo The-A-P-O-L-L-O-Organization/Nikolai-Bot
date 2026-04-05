@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
+  // Guild (server) this transaction belongs to
+  guildId: { type: String, required: true, index: true },
+  
   // Transaction type
   type: { 
     type: String, 

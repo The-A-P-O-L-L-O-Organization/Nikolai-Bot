@@ -46,8 +46,11 @@ const productionQueueItemSchema = new mongoose.Schema({
 });
 
 const nationSchema = new mongoose.Schema({
+  // Guild (server) this nation belongs to
+  guildId: { type: String, required: true, index: true },
+  
   // Basic Info
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   owner: { type: String, default: null },  // Discord user ID
   leader: { type: String, default: 'Unknown' },
   flag: { type: String, default: null },   // URL to flag image
@@ -136,8 +139,9 @@ nationSchema.pre('save', function(next) {
   next();
 });
 
-// Index for faster lookups (name already indexed via unique: true)
+// Index for faster lookups
 nationSchema.index({ owner: 1 });
+nationSchema.index({ guildId: 1, name: 1 }, { unique: true }); // Nation names unique per guild
 
 const Nation = mongoose.model('Nation', nationSchema);
 

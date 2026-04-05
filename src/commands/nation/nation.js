@@ -125,9 +125,13 @@ async function handleCreate(interaction) {
   const name = interaction.options.getString('name');
   const templateType = interaction.options.getString('template') || 'blank';
   const owner = interaction.options.getUser('owner');
+  const guildId = interaction.guildId;
 
-  // Check if nation already exists
-  const existing = await Nation.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  // Check if nation already exists in this guild
+  const existing = await Nation.findOne({ 
+    guildId,
+    name: { $regex: new RegExp(`^${name}$`, 'i') } 
+  });
   if (existing) {
     return interaction.reply({ embeds: [errorEmbed(`A nation named **${name}** already exists.`)], ephemeral: true });
   }
@@ -153,6 +157,7 @@ async function handleCreate(interaction) {
 
   // Create nation
   const nationData = {
+    guildId,
     name,
     owner: owner?.id || null,
     createdFrom: templateName,
@@ -171,6 +176,7 @@ async function handleCreate(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -188,7 +194,11 @@ async function handleCreate(interaction) {
 
 async function handleView(interaction) {
   const name = interaction.options.getString('name');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  const guildId = interaction.guildId;
+  const nation = await Nation.findOne({ 
+    guildId,
+    name: { $regex: new RegExp(`^${name}$`, 'i') } 
+  });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${name}** not found.`)], ephemeral: true });
@@ -201,7 +211,11 @@ async function handleEdit(interaction) {
   if (!requireGM(interaction)) return;
 
   const name = interaction.options.getString('name');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  const guildId = interaction.guildId;
+  const nation = await Nation.findOne({ 
+    guildId,
+    name: { $regex: new RegExp(`^${name}$`, 'i') } 
+  });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${name}** not found.`)], ephemeral: true });
@@ -263,7 +277,8 @@ async function handleDelete(interaction) {
   if (!requireGM(interaction)) return;
 
   const name = interaction.options.getString('name');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  const guildId = interaction.guildId;
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${name}$`, 'i') } });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${name}** not found.`)], ephemeral: true });
@@ -273,6 +288,7 @@ async function handleDelete(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -290,8 +306,9 @@ async function handleAssign(interaction) {
 
   const nationName = interaction.options.getString('nation');
   const player = interaction.options.getUser('player');
+  const guildId = interaction.guildId;
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -302,6 +319,7 @@ async function handleAssign(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -324,7 +342,8 @@ async function handleAssign(interaction) {
 }
 
 async function handleList(interaction) {
-  const nations = await Nation.find().sort({ name: 1 });
+  const guildId = interaction.guildId;
+  const nations = await Nation.find({ guildId }).sort({ name: 1 });
 
   if (nations.length === 0) {
     return interaction.reply({ embeds: [errorEmbed('No nations exist yet. Create one with `/nation create`.')] });
@@ -344,8 +363,9 @@ async function handleStats(interaction) {
   const nationName = interaction.options.getString('nation');
   const stat = interaction.options.getString('stat');
   const value = interaction.options.getString('value');
+  const guildId = interaction.guildId;
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -401,6 +421,7 @@ async function handleStats(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -419,10 +440,11 @@ async function handleStats(interaction) {
 // Handle modal submissions
 export async function handleModal(interaction) {
   const [, action, nationId] = interaction.customId.split(':');
+  const guildId = interaction.guildId;
   
   if (action === 'edit') {
     const nation = await Nation.findById(nationId);
-    if (!nation) {
+    if (!nation || nation.guildId !== guildId) {
       return interaction.reply({ embeds: [errorEmbed('Nation not found.')], ephemeral: true });
     }
 
@@ -449,6 +471,7 @@ export async function handleModal(interaction) {
     // Audit log
     if (changes.length > 0) {
       await createAuditLog({
+        guildId,
         entityType: 'nation',
         entityId: nation._id,
         entityName: nation.name,
@@ -469,7 +492,9 @@ export async function handleModal(interaction) {
 // Autocomplete for nation names
 export async function autocomplete(interaction) {
   const focusedValue = interaction.options.getFocused().toLowerCase();
+  const guildId = interaction.guildId;
   const nations = await Nation.find({
+    guildId,
     name: { $regex: focusedValue, $options: 'i' }
   }).limit(25);
 

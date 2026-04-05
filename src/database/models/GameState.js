@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import config from '../../config.js';
 
 const gameStateSchema = new mongoose.Schema({
-  // Singleton identifier
-  _id: { type: String, default: 'gameState' },
+  // Guild (server) this game state belongs to
+  guildId: { type: String, required: true, unique: true },
 
   // Current game year
   year: { type: Number, default: 1960 },
@@ -37,17 +37,17 @@ gameStateSchema.pre('save', function(next) {
 const GameState = mongoose.model('GameState', gameStateSchema);
 
 /**
- * Initialize game state if it doesn't exist
+ * Initialize game state for a guild if it doesn't exist
  */
-export async function initializeGameState() {
-  const existing = await GameState.findById('gameState');
+export async function initializeGameState(guildId) {
+  const existing = await GameState.findOne({ guildId });
   
   if (!existing) {
     const now = new Date();
     const nextProcessing = new Date(now.getTime() + (config.bot.turnIntervalHours * 60 * 60 * 1000));
     
     await GameState.create({
-      _id: 'gameState',
+      guildId,
       year: config.bot.startingYear,
       turn: {
         current: 0,
@@ -57,20 +57,22 @@ export async function initializeGameState() {
       },
     });
   }
+  
+  return await GameState.findOne({ guildId });
 }
 
 /**
- * Get the current game state
+ * Get the current game state for a guild
  */
-export async function getGameState() {
-  return await GameState.findById('gameState');
+export async function getGameState(guildId) {
+  return await GameState.findOne({ guildId });
 }
 
 /**
- * Update game state
+ * Update game state for a guild
  */
-export async function updateGameState(updates) {
-  return await GameState.findByIdAndUpdate('gameState', updates, { new: true });
+export async function updateGameState(guildId, updates) {
+  return await GameState.findOneAndUpdate({ guildId }, updates, { new: true });
 }
 
 export default GameState;

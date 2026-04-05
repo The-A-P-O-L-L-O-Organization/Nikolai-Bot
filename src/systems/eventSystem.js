@@ -18,8 +18,13 @@ export async function triggerRandomEvent(nation, eventChance = 15) {
     return null;
   }
 
-  // Get all available events
-  const allEvents = await Event.find();
+  // Get all available events (guild-specific + global defaults)
+  const allEvents = await Event.find({
+    $or: [
+      { guildId: nation.guildId },
+      { guildId: null, isDefault: true }
+    ]
+  });
   if (allEvents.length === 0) return null;
 
   // Filter events based on conditions
@@ -274,11 +279,13 @@ export function eventEmbed(nation, eventResult) {
  * Process events for all nations during a turn
  * @param {Array} nations - Array of nation documents
  * @param {number} eventChance - Percentage chance per nation
+ * @param {string} guildId - The guild ID for these nations
  * @returns {Array} Array of triggered events
  */
-export async function processEventsForTurn(nations, eventChance = 15) {
+export async function processEventsForTurn(nations, eventChance = 15, guildId = null) {
   const triggeredEvents = [];
-  const gameState = await getGameState();
+  const effectiveGuildId = guildId || nations[0]?.guildId;
+  const gameState = effectiveGuildId ? await getGameState(effectiveGuildId) : null;
 
   for (const nation of nations) {
     const result = await triggerRandomEvent(nation, eventChance);
@@ -288,6 +295,7 @@ export async function processEventsForTurn(nations, eventChance = 15) {
       
       // Audit log
       await createAuditLog({
+        guildId: nation.guildId,
         entityType: 'nation',
         entityId: nation._id,
         entityName: nation.name,

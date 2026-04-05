@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 
 const auditLogSchema = new mongoose.Schema({
+  // Guild (server) this log belongs to
+  guildId: { type: String, required: true, index: true },
+  
   // What was modified
   entityType: { 
     type: String, 
@@ -48,19 +51,19 @@ export async function createAuditLog(data) {
 }
 
 /**
- * Get audit logs for an entity
+ * Get audit logs for an entity in a guild
  */
-export async function getAuditLogs(entityType, entityId, limit = 50) {
-  return await AuditLog.find({ entityType, entityId })
+export async function getAuditLogs(guildId, entityType, entityId, limit = 50) {
+  return await AuditLog.find({ guildId, entityType, entityId })
     .sort({ createdAt: -1 })
     .limit(limit);
 }
 
 /**
- * Get recent audit logs
+ * Get recent audit logs for a guild
  */
-export async function getRecentAuditLogs(limit = 50) {
-  return await AuditLog.find()
+export async function getRecentAuditLogs(guildId, limit = 50) {
+  return await AuditLog.find({ guildId })
     .sort({ createdAt: -1 })
     .limit(limit);
 }

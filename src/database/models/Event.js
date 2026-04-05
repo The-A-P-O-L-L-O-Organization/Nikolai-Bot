@@ -13,7 +13,10 @@ const eventEffectSchema = new mongoose.Schema({
 });
 
 const eventSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
+  // Guild (server) this event belongs to (null for global defaults)
+  guildId: { type: String, default: null, index: true },
+  
+  name: { type: String, required: true },
   description: { type: String, required: true },
   
   // Event categorization
