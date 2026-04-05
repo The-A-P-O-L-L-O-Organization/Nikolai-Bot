@@ -14,8 +14,13 @@ A complete guide for Game Masters running Nation Roleplay games with Nikolai Bot
 6. [Research & Technology](#research--technology)
 7. [Turns & Time](#turns--time)
 8. [Events & Spirits](#events--spirits)
-9. [Administration](#administration)
-10. [Player Permissions](#player-permissions)
+9. [Social & Roleplay](#social--roleplay)
+10. [Advanced Gameplay](#advanced-gameplay)
+11. [Advanced Economy](#advanced-economy)
+12. [Advanced Diplomacy](#advanced-diplomacy)
+13. [Advanced Military](#advanced-military)
+14. [Administration](#administration)
+15. [Player Permissions](#player-permissions)
 
 ---
 
@@ -522,6 +527,744 @@ Events range from positive (Economic Boom) to catastrophic (Civil Unrest) and ca
 - Stability
 - Population
 - Military units
+
+---
+
+## Social & Roleplay
+
+### Press Releases
+
+Nations can issue official statements and propaganda.
+
+**Issue press release:**
+```
+/press release nation:Germany title:War Declaration content:Germany declares war on Poland!
+/press release nation:Germany title:Peace Offer content:We offer terms... type:diplomatic
+```
+
+Press types: `announcement`, `propaganda`, `diplomatic`, `economic`, `military`, `crisis`
+
+**View press releases:**
+```
+/press view nation:Germany
+/press list
+/press list type:diplomatic
+```
+
+**Delete press release (GM):**
+```
+/press delete id:abc123
+```
+
+### Reputation System
+
+Track nation reputation with other nations and globally.
+
+**Set reputation (GM):**
+```
+/reputation set nation:Germany target:France value:25 reason:Historic rivalry
+/reputation set nation:Germany global:true value:50 reason:International standing
+```
+
+**Modify reputation:**
+```
+/reputation add nation:Germany target:France amount:-10 reason:Border incident
+/reputation remove nation:Germany target:France amount:5 reason:Apology issued
+```
+
+**View reputation:**
+```
+/reputation view nation:Germany
+```
+
+### Crisis Events
+
+Manage global crises that nations can respond to.
+
+**Create crisis (GM):**
+```
+/crisis create name:Cuban Missile Crisis description:Nuclear standoff severity:critical
+```
+
+Severity levels: `minor`, `moderate`, `major`, `critical`
+
+**Nation response:**
+```
+/crisis respond crisis:Cuban Missile Crisis nation:USA response:Naval blockade type:diplomatic
+```
+
+Response types: `support`, `oppose`, `neutral`, `diplomatic`, `military`, `economic`
+
+**Resolve crisis:**
+```
+/crisis resolve crisis:Cuban Missile Crisis resolution:Peaceful agreement outcome:success
+```
+
+**View crises:**
+```
+/crisis view crisis:Cuban Missile Crisis
+/crisis list
+/crisis list status:active
+```
+
+---
+
+## Advanced Gameplay
+
+### Infrastructure
+
+Manage national infrastructure projects.
+
+**Create infrastructure project (GM):**
+```
+/infrastructure create nation:Germany name:Autobahn type:transportation level:3
+```
+
+Types: `transportation`, `energy`, `communications`, `healthcare`, `education`, `industrial`, `military`, `agricultural`
+
+**Upgrade infrastructure:**
+```
+/infrastructure upgrade nation:Germany name:Autobahn
+```
+
+**Damage infrastructure (from war, etc.):**
+```
+/infrastructure damage nation:Germany name:Autobahn amount:50 reason:Allied bombing
+```
+
+**Repair infrastructure:**
+```
+/infrastructure repair nation:Germany name:Autobahn amount:25
+```
+
+**View infrastructure:**
+```
+/infrastructure view nation:Germany
+/infrastructure list
+```
+
+### Wonders & Projects
+
+Construct mega-projects like space programs, monuments, etc.
+
+**Create project template (GM):**
+```
+/project template create name:Apollo Program category:space description:Moon landing program
+```
+
+Categories: `military`, `economic`, `scientific`, `cultural`, `infrastructure`, `space`, `wonder`
+
+**Set project requirements:**
+```
+/project template requirements name:Apollo Program cost:50B currency:Dollars turns:10
+```
+
+**Start project for nation:**
+```
+/project start nation:USA project:Apollo Program
+```
+
+**Advance/complete project:**
+```
+/project progress nation:USA project:Apollo Program turns:2
+/project complete nation:USA project:Apollo Program
+```
+
+**View projects:**
+```
+/project view nation:USA
+/project list
+```
+
+### Fog of War
+
+Control information visibility between nations.
+
+**Set visibility (GM):**
+```
+/fogofwar set observer:USA target:USSR category:military visibility:partial
+```
+
+Categories: `military`, `economy`, `research`, `diplomacy`, `all`
+Visibility levels: `none`, `partial`, `full`
+
+**Grant full intelligence:**
+```
+/fogofwar reveal observer:USA target:USSR category:all
+```
+
+**Hide information:**
+```
+/fogofwar hide observer:USA target:USSR category:military
+```
+
+**View visibility settings:**
+```
+/fogofwar view observer:USA target:USSR
+/fogofwar list nation:USA
+```
+
+### Turn Reminders
+
+Set up notifications before turn processing.
+
+**Enable reminder:**
+```
+/reminder set nation:Germany minutes:30 channel:#germany-alerts
+```
+
+**View reminders:**
+```
+/reminder view nation:Germany
+/reminder list
+```
+
+**Disable reminder:**
+```
+/reminder remove nation:Germany
+```
+
+### Nation Profiles
+
+Export detailed nation summaries.
+
+**Generate profile:**
+```
+/profile view nation:Germany
+/profile export nation:Germany
+```
+
+### Bulk Operations (GM)
+
+Perform batch operations across multiple nations.
+
+**Add to multiple nations:**
+```
+/bulk add type:currency name:Dollars amount:1B nations:Germany,France,UK reason:Marshall Plan
+/bulk add type:stability amount:10 nations:all reason:Global peace
+```
+
+**Remove from multiple nations:**
+```
+/bulk remove type:resource name:Oil amount:1000 nations:Germany,Japan reason:Embargo
+```
+
+---
+
+## Advanced Economy
+
+### Trade Routes
+
+Establish and manage trade connections.
+
+**Create trade route (GM):**
+```
+/trade create from:Germany to:Italy resource:Steel amount:5000 frequency:per_turn
+```
+
+**View trade routes:**
+```
+/trade view nation:Germany
+/trade list
+```
+
+**Suspend/resume trade:**
+```
+/trade suspend from:Germany to:Italy resource:Steel reason:Diplomatic tensions
+/trade resume from:Germany to:Italy resource:Steel
+```
+
+**Delete trade route:**
+```
+/trade delete from:Germany to:Italy resource:Steel
+```
+
+### Sanctions
+
+Impose economic sanctions on nations.
+
+**Create sanction (GM):**
+```
+/sanction create target:Germany type:trade_embargo reason:Aggression
+/sanction create target:Germany type:asset_freeze imposed_by:USA,UK,France
+```
+
+Sanction types: `trade_embargo`, `arms_embargo`, `financial`, `travel_ban`, `asset_freeze`, `partial`, `comprehensive`
+
+**View sanctions:**
+```
+/sanction view nation:Germany
+/sanction list
+```
+
+**Lift sanction:**
+```
+/sanction lift target:Germany type:trade_embargo reason:Peace treaty signed
+```
+
+### Black Market
+
+Manage covert transactions outside normal channels.
+
+**Create black market transaction (GM):**
+```
+/blackmarket create seller:USSR buyer:Cuba type:arms_deal amount:50M description:Missile shipment
+```
+
+Types: `arms_deal`, `contraband`, `intelligence`, `technology`, `resources`, `currency`
+
+**Discover transaction:**
+```
+/blackmarket discover id:abc123 discovered_by:USA
+```
+
+**View transactions:**
+```
+/blackmarket view nation:USSR
+/blackmarket list
+/blackmarket list discovered:true
+```
+
+### Currency Exchange
+
+Track exchange rates between currencies.
+
+**Set exchange rate (GM):**
+```
+/exchange rate set from:Reichsmarks to:Dollars rate:0.4
+```
+
+**View rates:**
+```
+/exchange rate view from:Reichsmarks to:Dollars
+/exchange rate list
+```
+
+**Fluctuate rates:**
+```
+/exchange fluctuate currency:Reichsmarks change:-10 reason:War uncertainty
+```
+
+### Economic Crises
+
+Model economic downturns and their effects.
+
+**Create crisis (GM):**
+```
+/econcrisis create name:Great Depression severity:severe region:global
+```
+
+Severity: `minor`, `moderate`, `severe`, `catastrophic`
+
+**Apply to nation:**
+```
+/econcrisis apply crisis:Great Depression nation:Germany effects:gdp:-20,stability:-15
+```
+
+**Resolve crisis:**
+```
+/econcrisis resolve crisis:Great Depression outcome:Recovery began
+```
+
+**View crises:**
+```
+/econcrisis view crisis:Great Depression
+/econcrisis list
+```
+
+---
+
+## Advanced Diplomacy
+
+### Espionage
+
+Intelligence operations between nations.
+
+**Launch operation (GM):**
+```
+/espionage launch operator:USA target:USSR type:intelligence mission:Gather military intel
+```
+
+Operation types: `intelligence`, `sabotage`, `assassination`, `propaganda`, `counter_intelligence`, `cyber`, `theft`
+
+**Set operation parameters:**
+```
+/espionage resources operation_id:abc123 agents:5 funding:10M
+```
+
+**Resolve operation:**
+```
+/espionage resolve operation_id:abc123 success:true discovered:false
+```
+
+**View operations:**
+```
+/espionage view nation:USA
+/espionage list status:active
+```
+
+### Alliances
+
+Formal alliance organizations with membership and voting.
+
+**Create alliance (GM):**
+```
+/alliance create name:NATO type:military description:North Atlantic Treaty Organization
+```
+
+Types: `military`, `economic`, `political`, `defensive`
+
+**Add/remove members:**
+```
+/alliance member add alliance:NATO nation:USA role:founder
+/alliance member remove alliance:NATO nation:France
+```
+
+**Create proposal:**
+```
+/alliance proposal create alliance:NATO type:expansion proposal:Admit West Germany
+```
+
+**Vote on proposal:**
+```
+/alliance proposal vote alliance:NATO proposal_id:abc123 nation:USA vote:yes
+```
+
+**View alliance:**
+```
+/alliance view alliance:NATO
+/alliance list
+```
+
+### World Council
+
+UN-style international body with resolutions.
+
+**Create council (GM):**
+```
+/council create name:United Nations type:general description:International organization
+```
+
+**Add members:**
+```
+/council member add council:United Nations nation:USA role:permanent
+```
+
+**Propose resolution:**
+```
+/council resolution propose council:United Nations title:Sanctions on Aggressor type:sanction description:Economic sanctions against...
+```
+
+Resolution types: `sanction`, `peacekeeping`, `humanitarian`, `declaration`, `membership`, `condemnation`
+
+**Vote on resolution:**
+```
+/council resolution vote council:United Nations resolution_id:abc123 nation:USA vote:yes
+```
+
+**Pass/fail resolution:**
+```
+/council resolution pass council:United Nations resolution_id:abc123
+/council resolution fail council:United Nations resolution_id:abc123
+```
+
+**View council:**
+```
+/council view council:United Nations
+/council resolution view resolution_id:abc123
+```
+
+### Government Types
+
+Assign government systems with mechanical modifiers.
+
+**Create template (GM):**
+```
+/government template create name:Federal Republic category:democracy succession:election
+```
+
+Categories: `democracy`, `republic`, `monarchy`, `constitutional_monarchy`, `dictatorship`, `communist`, `fascist`, `socialist`, `theocracy`, `oligarchy`, `military_junta`, `parliamentary`, `presidential`, `anarchy`, `custom`
+
+**Set modifiers:**
+```
+/government modifiers set template:Federal Republic stability:10 economy_growth:5 freedom:80 coup_resistance:70
+```
+
+**Assign to nation:**
+```
+/government assign nation:Germany template:Federal Republic
+```
+
+**View government:**
+```
+/government view nation:Germany
+/government template list
+```
+
+### Coups
+
+Model coup attempts with success/failure mechanics.
+
+**Plan coup (GM):**
+```
+/coup plan target:Chile leader:General Pinochet type:military backer:USA
+```
+
+Coup types: `military`, `political`, `popular`, `palace`, `foreign_backed`, `self_coup`
+
+**Set factors:**
+```
+/coup factors target:Chile military:60 popular:30 elite:70 foreign:20
+```
+
+**Set resources:**
+```
+/coup resources target:Chile troops:5000 funding:10M
+```
+
+**Execute coup (roll for success):**
+```
+/coup execute target:Chile
+```
+
+**Manually resolve:**
+```
+/coup resolve target:Chile success:true leader_survived:true new_leader:Pinochet new_government:Military Junta
+```
+
+**View coup:**
+```
+/coup view target:Chile
+/coup list
+```
+
+---
+
+## Advanced Military
+
+### Battle Simulator
+
+Resolve combat with dice rolls and modifiers.
+
+**Create battle (GM):**
+```
+/battle create name:Battle of Stalingrad attacker:Germany defender:USSR terrain:urban type:siege
+```
+
+Terrain: `plains`, `forest`, `mountains`, `urban`, `desert`, `jungle`, `arctic`, `coastal`, `river`, `marsh`, `hills`
+Types: `pitched`, `siege`, `ambush`, `naval`, `aerial`, `amphibious`, `defensive`, `pursuit`, `skirmish`
+
+**Set forces:**
+```
+/battle forces battle:Battle of Stalingrad side:attacker unit_type:Infantry quantity:300000 quality:70
+/battle forces battle:Battle of Stalingrad side:defender unit_type:Infantry quantity:500000 quality:60
+```
+
+**Set modifiers:**
+```
+/battle modifiers battle:Battle of Stalingrad side:attacker supply:-20 morale:10
+/battle modifiers battle:Battle of Stalingrad side:defender fortifications:30 terrain:20
+```
+
+**Set commanders:**
+```
+/battle commander battle:Battle of Stalingrad side:attacker name:Friedrich Paulus
+/battle commander battle:Battle of Stalingrad side:defender name:Vasily Chuikov
+```
+
+**Simulate battle:**
+```
+/battle simulate battle:Battle of Stalingrad
+```
+
+**Manually resolve:**
+```
+/battle resolve battle:Battle of Stalingrad victor:defender decisiveness:decisive attacker_casualties:90 defender_casualties:40
+```
+
+**View battles:**
+```
+/battle view battle:Battle of Stalingrad
+/battle list
+/battle list nation:Germany
+```
+
+### Military Doctrines
+
+Assign combat doctrines with bonuses.
+
+**Create template (GM):**
+```
+/doctrine template create name:Blitzkrieg category:mobile description:Lightning war tactics
+```
+
+Categories: `offensive`, `defensive`, `mobile`, `guerrilla`, `combined_arms`, `naval`, `aerial`, `nuclear`, `irregular`, `siege`, `custom`
+
+**Set modifiers:**
+```
+/doctrine modifiers set template:Blitzkrieg attack:20 mobility:30 morale:10 casualties:-10
+```
+
+**Add ability:**
+```
+/doctrine ability template:Blitzkrieg name:Encirclement description:Can surround enemy units effect:+25% casualty infliction
+```
+
+**Assign to nation:**
+```
+/doctrine assign nation:Germany template:Blitzkrieg
+```
+
+**View doctrine:**
+```
+/doctrine view nation:Germany
+/doctrine template list
+```
+
+### Occupations
+
+Track military occupations of territories.
+
+**Create occupation (GM):**
+```
+/occupation create occupier:Germany occupied:France type:military territory:Northern France size:partial
+```
+
+Types: `military`, `administrative`, `colonial`, `protective`, `peacekeeping`, `annexation`
+
+**Set garrison:**
+```
+/occupation garrison occupier:Germany occupied:France troops:500000 quality:60 maintenance:100M
+```
+
+**Set resistance:**
+```
+/occupation resistance occupier:Germany occupied:France level:40 type:armed partisans:50000 support:60
+```
+
+**Set policies:**
+```
+/occupation policy occupier:Germany occupied:France governance:military_admin civilian:strict economic:exploitation
+```
+
+**Set extraction:**
+```
+/occupation extraction occupier:Germany occupied:France resources:10000 wealth:500M level:heavy
+```
+
+**Record event:**
+```
+/occupation event occupier:Germany occupied:France type:Massacre description:Civilian reprisals civilian_casualties:500
+```
+
+**End occupation:**
+```
+/occupation end occupier:Germany occupied:France
+```
+
+**View occupation:**
+```
+/occupation view occupier:Germany occupied:France
+/occupation list
+```
+
+### Arms Treaties
+
+Nuclear and arms control agreements.
+
+**Create treaty (GM):**
+```
+/armstreaty create name:SALT I type:arms_limitation description:Strategic Arms Limitation Treaty
+```
+
+Types: `nuclear_nonproliferation`, `arms_limitation`, `test_ban`, `disarmament`, `demilitarization`, `weapons_ban`, `custom`
+
+**Set terms:**
+```
+/armstreaty terms treaty:SALT I nuclear_ban:false max_warheads:2400 inspections:true
+```
+
+**Ban weapons:**
+```
+/armstreaty ban treaty:Geneva Protocol weapon:Chemical Weapons
+```
+
+**Invite/sign/ratify:**
+```
+/armstreaty invite treaty:SALT I nation:USA
+/armstreaty sign treaty:SALT I nation:USA
+/armstreaty ratify treaty:SALT I nation:USA
+```
+
+**Record violation:**
+```
+/armstreaty violation treaty:NPT nation:Iran description:Secret enrichment facility severity:major
+```
+
+**Activate/collapse:**
+```
+/armstreaty activate treaty:SALT I
+/armstreaty collapse treaty:SALT I
+```
+
+**View treaty:**
+```
+/armstreaty view treaty:SALT I
+/armstreaty list
+```
+
+### Mercenaries
+
+Hire and manage mercenary companies.
+
+**Create company (GM):**
+```
+/mercenary company create name:Wagner Group type:private_military description:Russian PMC motto:Blood and Honor
+```
+
+Types: `private_military`, `mercenary_band`, `security_contractor`, `foreign_legion`, `volunteer_corps`, `pirates`, `rebel_fighters`, `custom`
+
+**Set forces:**
+```
+/mercenary forces set company:Wagner Group infantry:5000 armor:50 special:500
+```
+
+**Set ratings:**
+```
+/mercenary ratings set company:Wagner Group combat:70 discipline:50 loyalty:60 morale:65 equipment:60
+```
+
+**Set pricing:**
+```
+/mercenary pricing set company:Wagner Group hire_cost:100M monthly:20M combat_bonus:5M currency:Dollars
+```
+
+**Set commander:**
+```
+/mercenary commander company:Wagner Group name:Dmitry Utkin background:Former GRU officer
+```
+
+**Add specialization:**
+```
+/mercenary specialization company:Wagner Group spec:urban
+```
+
+**Hire company:**
+```
+/mercenary hire company:Wagner Group nation:Syria duration:12 mission:Counter-insurgency operations
+```
+
+**Release company:**
+```
+/mercenary release company:Wagner Group reason:completed
+```
+
+**View company:**
+```
+/mercenary company view name:Wagner Group
+/mercenary company list
+/mercenary contracts nation:Syria
+```
 
 ---
 

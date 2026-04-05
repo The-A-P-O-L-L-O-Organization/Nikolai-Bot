@@ -4,6 +4,7 @@ A comprehensive Discord bot for managing Nation Roleplay (NRP) games. Handles na
 
 ## Features
 
+### Core Systems
 - **Nation Management** - Create and manage nations with detailed statistics
 - **Economy System** - Multiple currencies, GDP, budgets, loans, and transactions
 - **Military** - Army, Airforce, Navy units with production queues
@@ -13,6 +14,42 @@ A comprehensive Discord bot for managing Nation Roleplay (NRP) games. Handles na
 - **Random Events** - Configurable events that can affect nations each turn
 - **Turn Processing** - Automatic processing every 12 hours (configurable)
 - **Comprehensive Logging** - Audit logs, transaction history, and event tracking
+
+### Social & Roleplay
+- **Press Releases** - Nations can issue official statements and propaganda
+- **Reputation System** - Track nation reputation with individual nations and globally
+- **Crisis Events** - GM-managed global crises with nation responses
+
+### Advanced Gameplay
+- **Infrastructure** - Build and manage national infrastructure projects
+- **Wonders & Projects** - Construct mega-projects (space programs, monuments, etc.)
+- **Fog of War** - Control information visibility between nations
+
+### Economy Expansion
+- **Trade Routes** - Establish and manage trade connections between nations
+- **Sanctions** - Impose economic sanctions on nations
+- **Black Market** - Covert transactions outside normal channels
+- **Currency Exchange** - Track exchange rates between currencies
+- **Economic Crises** - Model economic downturns and their effects
+
+### Diplomacy & Politics
+- **Espionage** - Intelligence operations between nations
+- **Alliances** - Formal alliance organizations with membership and voting
+- **World Council** - UN-style international body with resolutions
+- **Government Types** - Assign government systems with mechanical modifiers
+- **Coups** - Model coup attempts with success/failure mechanics
+
+### Military Expansion
+- **Battle Simulator** - Resolve combat with dice rolls and modifiers
+- **Military Doctrines** - Assign combat doctrines with bonuses
+- **Occupations** - Track military occupations of territories
+- **Arms Treaties** - Nuclear and arms control agreements
+- **Mercenaries** - Hire and manage mercenary companies
+
+### Quality of Life
+- **Turn Reminders** - Get notified before turn processing
+- **Nation Profiles** - Detailed exportable nation summaries
+- **Bulk Operations** - Perform batch operations across multiple nations
 
 ## Requirements
 
@@ -77,6 +114,11 @@ A comprehensive Discord bot for managing Nation Roleplay (NRP) games. Handles na
 - `/transfer` - Transfer resources between nations
 - `/loan give/repay/view` - Loan management
 - `/transactions` - View transaction history
+- `/trade` - Trade route management (GM)
+- `/sanction` - Economic sanctions (GM)
+- `/blackmarket` - Black market transactions (GM)
+- `/exchange` - Currency exchange rates (GM)
+- `/econcrisis` - Economic crisis management (GM)
 
 ### Military Commands
 - `/military view` - View military forces
@@ -85,6 +127,11 @@ A comprehensive Discord bot for managing Nation Roleplay (NRP) games. Handles na
 - `/unit cancel` - Cancel production order
 - `/unit queue` - View production queue
 - `/resources view/set` - Resource management
+- `/battle` - Battle simulator (GM)
+- `/doctrine` - Military doctrine management (GM)
+- `/occupation` - Territory occupation management (GM)
+- `/armstreaty` - Arms control treaty management (GM)
+- `/mercenary` - Mercenary company management (GM)
 
 ### Diplomacy Commands
 - `/war declare` - Declare war (GM)
@@ -93,6 +140,26 @@ A comprehensive Discord bot for managing Nation Roleplay (NRP) games. Handles na
 - `/war view/list` - View wars
 - `/treaty create/sign/dissolve` - Treaty management (GM)
 - `/treaty view/list` - View treaties
+- `/espionage` - Intelligence operations (GM)
+- `/alliance` - Alliance management (GM)
+- `/council` - World Council/UN management (GM)
+- `/government` - Government type management (GM)
+- `/coup` - Coup attempt management (GM)
+
+### Social & Roleplay Commands
+- `/press` - Press release management
+- `/reputation` - Nation reputation system (GM)
+- `/crisis` - Global crisis management (GM)
+
+### Gameplay Commands
+- `/infrastructure` - Infrastructure management (GM)
+- `/project` - Wonder/project management (GM)
+- `/fogofwar` - Information visibility control (GM)
+
+### Quality of Life Commands
+- `/reminder` - Turn reminder setup
+- `/profile` - Nation profile export
+- `/bulk` - Bulk operations (GM)
 
 ### Research Commands
 - `/research start` - Begin researching technology
@@ -169,6 +236,7 @@ Events can be positive, neutral, negative, or catastrophic. They're triggered ba
 
 ## Database Models
 
+### Core Models
 - **Nation** - Core nation data, military, economy, spirits
 - **GameState** - Current year, turn info, global settings
 - **Technology** - Tech definitions and requirements
@@ -180,6 +248,36 @@ Events can be positive, neutral, negative, or catastrophic. They're triggered ba
 - **Resource** - Currency and resource definitions
 - **Unit** - Unit type definitions
 - **Template** - Nation templates
+
+### Economy Models
+- **TradeRoute** - Trade connections between nations
+- **Sanction** - Economic sanctions
+- **BlackMarketTransaction** - Covert transactions
+- **Economy** - Currency exchange rates and economic crises
+
+### Diplomacy Models
+- **EspionageOperation** - Intelligence operations
+- **Alliance** - Formal alliance organizations
+- **WorldCouncil** / **Resolution** - International body and resolutions
+- **GovernmentType** / **CoupAttempt** - Government systems and coups
+
+### Military Models
+- **Battle** - Battle simulation records
+- **Doctrine** - Military doctrine templates
+- **Occupation** - Territory occupations
+- **NuclearTreaty** - Arms control treaties
+- **MercenaryCompany** / **MercenaryContract** - Mercenary companies
+
+### Social/RP Models
+- **PressRelease** - Official nation statements
+- **Reputation** - Nation reputation tracking
+- **Crisis** - Global crisis events
+
+### Gameplay Models
+- **Infrastructure** - Infrastructure projects
+- **Project** - Wonders and mega-projects
+- **FogOfWar** - Information visibility
+- **TurnReminder** - Turn notification settings
 
 ## Development
 
