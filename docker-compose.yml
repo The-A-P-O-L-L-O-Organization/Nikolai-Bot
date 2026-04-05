@@ -16,7 +16,7 @@ services:
       - nikolai-network
 
   mongodb:
-    image: mongo:7
+    image: mongo:4.4
     container_name: nikolai-mongodb
     restart: unless-stopped
     volumes:
