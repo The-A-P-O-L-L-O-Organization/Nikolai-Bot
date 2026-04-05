@@ -63,8 +63,9 @@ export async function execute(interaction) {
 }
 
 async function handleView(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
@@ -93,10 +94,11 @@ async function handleView(interaction) {
 async function handleAdd(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const presetName = interaction.options.getString('preset');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -117,6 +119,7 @@ async function handleAdd(interaction) {
     await nation.save();
 
     await createAuditLog({
+      guildId,
       entityType: 'nation',
       entityId: nation._id,
       entityName: nation.name,
@@ -169,10 +172,11 @@ async function handleAdd(interaction) {
 async function handleRemove(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const spiritName = interaction.options.getString('spirit');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -187,6 +191,7 @@ async function handleRemove(interaction) {
   await nation.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -259,9 +264,10 @@ async function handleList(interaction) {
 
 export async function handleModal(interaction) {
   const [, action, nationId] = interaction.customId.split(':');
+  const guildId = interaction.guildId;
 
   if (action === 'add') {
-    const nation = await Nation.findById(nationId);
+    const nation = await Nation.findOne({ _id: nationId, guildId });
     if (!nation) {
       return interaction.reply({ embeds: [errorEmbed('Nation not found.')], ephemeral: true });
     }
@@ -287,6 +293,7 @@ export async function handleModal(interaction) {
     await nation.save();
 
     await createAuditLog({
+      guildId,
       entityType: 'nation',
       entityId: nation._id,
       entityName: nation.name,
@@ -304,9 +311,11 @@ export async function handleModal(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));
@@ -317,7 +326,7 @@ export async function autocomplete(interaction) {
     await interaction.respond(filtered.map(s => ({ name: s.name, value: s.name })));
   } else if (focusedOption.name === 'spirit') {
     const nationName = interaction.options.getString('nation');
-    const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+    const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
     if (nation && nation.spirits) {
       const filtered = nation.spirits.filter(s =>
         s.name.toLowerCase().includes(focusedOption.value.toLowerCase())

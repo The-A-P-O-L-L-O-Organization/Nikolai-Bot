@@ -161,8 +161,9 @@ async function handleList(interaction) {
 }
 
 async function handleView(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
@@ -201,11 +202,12 @@ async function handleView(interaction) {
 async function handleAdd(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const resourceName = interaction.options.getString('resource');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -219,6 +221,7 @@ async function handleAdd(interaction) {
   await nation.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -237,11 +240,12 @@ async function handleAdd(interaction) {
 async function handleRemove(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const resourceName = interaction.options.getString('resource');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -255,6 +259,7 @@ async function handleRemove(interaction) {
   await nation.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -273,11 +278,12 @@ async function handleRemove(interaction) {
 async function handleSet(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const resourceName = interaction.options.getString('resource');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -290,6 +296,7 @@ async function handleSet(interaction) {
   await nation.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -308,11 +315,12 @@ async function handleSet(interaction) {
 async function handleIncome(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const resourceName = interaction.options.getString('resource');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -325,6 +333,7 @@ async function handleIncome(interaction) {
   await nation.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -344,16 +353,18 @@ async function handleIncome(interaction) {
 async function handleCreate(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const name = interaction.options.getString('name');
   const icon = interaction.options.getString('icon') || '📦';
   const type = interaction.options.getString('type') || 'resource';
 
-  const existing = await Resource.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  const existing = await Resource.findOne({ guildId, name: { $regex: new RegExp(`^${name}$`, 'i') } });
   if (existing) {
     return interaction.reply({ embeds: [errorEmbed(`A resource named **${name}** already exists.`)], ephemeral: true });
   }
 
   await Resource.create({
+    guildId,
     name,
     icon,
     type,
@@ -361,6 +372,7 @@ async function handleCreate(interaction) {
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'resource',
     entityName: name,
     action: 'create',
@@ -374,9 +386,11 @@ async function handleCreate(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));

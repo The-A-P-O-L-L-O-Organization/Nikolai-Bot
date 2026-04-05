@@ -124,6 +124,7 @@ export async function execute(interaction) {
 async function handleCreate(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const name = interaction.options.getString('name');
   const type = interaction.options.getString('type');
   const nationsStr = interaction.options.getString('nations');
@@ -139,7 +140,7 @@ async function handleCreate(interaction) {
   // Find all nations
   const members = [];
   for (const nationName of nationNames) {
-    const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+    const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
     if (!nation) {
       return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
     }
@@ -147,6 +148,7 @@ async function handleCreate(interaction) {
   }
 
   const treaty = await Treaty.create({
+    guildId,
     name,
     type,
     description,
@@ -155,6 +157,7 @@ async function handleCreate(interaction) {
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'treaty',
     entityId: treaty._id,
     entityName: treaty.name,
@@ -173,10 +176,12 @@ async function handleCreate(interaction) {
 async function handleAdd(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const treatyName = interaction.options.getString('treaty');
   const nationName = interaction.options.getString('nation');
 
   const treaty = await Treaty.findOne({ 
+    guildId,
     name: { $regex: new RegExp(`^${treatyName}$`, 'i') },
     status: 'active'
   });
@@ -185,7 +190,7 @@ async function handleAdd(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Active treaty **${treatyName}** not found.`)], ephemeral: true });
   }
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -199,6 +204,7 @@ async function handleAdd(interaction) {
   await treaty.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'treaty',
     entityId: treaty._id,
     entityName: treaty.name,
@@ -214,15 +220,16 @@ async function handleAdd(interaction) {
 async function handleRemove(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const treatyName = interaction.options.getString('treaty');
   const nationName = interaction.options.getString('nation');
 
-  const treaty = await Treaty.findOne({ name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
+  const treaty = await Treaty.findOne({ guildId, name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
   if (!treaty) {
     return interaction.reply({ embeds: [errorEmbed(`Treaty **${treatyName}** not found.`)], ephemeral: true });
   }
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -236,6 +243,7 @@ async function handleRemove(interaction) {
   await treaty.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'treaty',
     entityId: treaty._id,
     entityName: treaty.name,
@@ -251,9 +259,11 @@ async function handleRemove(interaction) {
 async function handleDissolve(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const treatyName = interaction.options.getString('treaty');
 
   const treaty = await Treaty.findOne({ 
+    guildId,
     name: { $regex: new RegExp(`^${treatyName}$`, 'i') },
     status: 'active'
   });
@@ -267,6 +277,7 @@ async function handleDissolve(interaction) {
   await treaty.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'treaty',
     entityId: treaty._id,
     entityName: treaty.name,
@@ -280,8 +291,9 @@ async function handleDissolve(interaction) {
 }
 
 async function handleView(interaction) {
+  const guildId = interaction.guildId;
   const treatyName = interaction.options.getString('treaty');
-  const treaty = await Treaty.findOne({ name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
+  const treaty = await Treaty.findOne({ guildId, name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
 
   if (!treaty) {
     return interaction.reply({ embeds: [errorEmbed(`Treaty **${treatyName}** not found.`)], ephemeral: true });
@@ -291,9 +303,10 @@ async function handleView(interaction) {
 }
 
 async function handleList(interaction) {
+  const guildId = interaction.guildId;
   const activeOnly = interaction.options.getBoolean('active_only') ?? true;
   
-  const query = activeOnly ? { status: 'active' } : {};
+  const query = activeOnly ? { guildId, status: 'active' } : { guildId };
   const treaties = await Treaty.find(query).sort({ signedAt: -1 });
 
   if (treaties.length === 0) {
@@ -320,10 +333,11 @@ async function handleList(interaction) {
 async function handleTerms(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const treatyName = interaction.options.getString('treaty');
   const term = interaction.options.getString('term');
 
-  const treaty = await Treaty.findOne({ name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
+  const treaty = await Treaty.findOne({ guildId, name: { $regex: new RegExp(`^${treatyName}$`, 'i') } });
   if (!treaty) {
     return interaction.reply({ embeds: [errorEmbed(`Treaty **${treatyName}** not found.`)], ephemeral: true });
   }
@@ -336,14 +350,17 @@ async function handleTerms(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));
   } else if (focusedOption.name === 'treaty') {
     const treaties = await Treaty.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(treaties.map(t => ({ name: `${t.name} (${t.status})`, value: t.name })));

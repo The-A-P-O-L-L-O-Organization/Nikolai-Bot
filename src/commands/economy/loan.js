@@ -96,14 +96,15 @@ export async function execute(interaction) {
 async function handleCreate(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const creditorName = interaction.options.getString('creditor');
   const debtorName = interaction.options.getString('debtor');
   const amountStr = interaction.options.getString('amount');
   const currencyName = interaction.options.getString('currency');
   const interestRate = interaction.options.getNumber('interest') || 0;
 
-  const creditor = await Nation.findOne({ name: { $regex: new RegExp(`^${creditorName}$`, 'i') } });
-  const debtor = await Nation.findOne({ name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
+  const creditor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${creditorName}$`, 'i') } });
+  const debtor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
 
   if (!creditor) {
     return interaction.reply({ embeds: [errorEmbed(`Creditor nation **${creditorName}** not found.`)], ephemeral: true });
@@ -147,6 +148,7 @@ async function handleCreate(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: debtor._id,
     entityName: debtor.name,
@@ -174,11 +176,12 @@ async function handleCreate(interaction) {
 async function handlePay(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const debtorName = interaction.options.getString('debtor');
   const loanIndex = interaction.options.getInteger('loan_index') - 1;
   const amountStr = interaction.options.getString('amount');
 
-  const debtor = await Nation.findOne({ name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
+  const debtor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
   if (!debtor) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${debtorName}** not found.`)], ephemeral: true });
   }
@@ -220,6 +223,7 @@ async function handlePay(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: debtor._id,
     entityName: debtor.name,
@@ -238,8 +242,9 @@ async function handlePay(interaction) {
 }
 
 async function handleList(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
@@ -276,10 +281,11 @@ async function handleList(interaction) {
 async function handleForgive(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const debtorName = interaction.options.getString('debtor');
   const loanIndex = interaction.options.getInteger('loan_index') - 1;
 
-  const debtor = await Nation.findOne({ name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
+  const debtor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${debtorName}$`, 'i') } });
   if (!debtor) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${debtorName}** not found.`)], ephemeral: true });
   }
@@ -294,6 +300,7 @@ async function handleForgive(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: debtor._id,
     entityName: debtor.name,
@@ -309,9 +316,11 @@ async function handleForgive(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'creditor' || focusedOption.name === 'debtor' || focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));

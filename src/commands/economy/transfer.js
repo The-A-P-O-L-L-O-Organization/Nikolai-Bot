@@ -37,6 +37,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(false));
 
 export async function execute(interaction) {
+  const guildId = interaction.guildId;
   const fromName = interaction.options.getString('from');
   const toName = interaction.options.getString('to');
   const amountStr = interaction.options.getString('amount');
@@ -44,8 +45,8 @@ export async function execute(interaction) {
   const reason = interaction.options.getString('reason') || 'Transfer';
 
   // Get both nations
-  const fromNation = await Nation.findOne({ name: { $regex: new RegExp(`^${fromName}$`, 'i') } });
-  const toNation = await Nation.findOne({ name: { $regex: new RegExp(`^${toName}$`, 'i') } });
+  const fromNation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${fromName}$`, 'i') } });
+  const toNation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${toName}$`, 'i') } });
 
   if (!fromNation) {
     return interaction.reply({ embeds: [errorEmbed(`Sending nation **${fromName}** not found.`)], ephemeral: true });
@@ -99,10 +100,11 @@ export async function execute(interaction) {
   await fromNation.save();
   await toNation.save();
 
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
 
   // Log transaction
   await Transaction.create({
+    guildId,
     type: 'transfer',
     from: { nation: fromNation._id, nationName: fromNation.name },
     to: { nation: toNation._id, nationName: toNation.name },
@@ -115,6 +117,7 @@ export async function execute(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: fromNation._id,
     entityName: fromNation.name,
@@ -143,9 +146,11 @@ export async function execute(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'from' || focusedOption.name === 'to') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));

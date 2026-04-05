@@ -115,25 +115,27 @@ export async function execute(interaction) {
 }
 
 async function handleView(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
 
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
 
-  const resources = await Resource.find().sort({ type: 1, name: 1 });
+  const resources = await Resource.find({ $or: [{ guildId }, { guildId: null }] }).sort({ type: 1, name: 1 });
   await interaction.reply({ embeds: [economyEmbed(nation, resources)] });
 }
 
 async function handleSet(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const currencyName = interaction.options.getString('currency');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -147,10 +149,11 @@ async function handleSet(interaction) {
   nation.economy.currencies.set(currencyName, amount);
   await nation.save();
 
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
 
   // Log transaction
   await Transaction.create({
+    guildId,
     type: 'adjustment',
     to: { nation: nation._id, nationName: nation.name },
     currency: currencyName,
@@ -162,6 +165,7 @@ async function handleSet(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -180,12 +184,13 @@ async function handleSet(interaction) {
 async function handleAdd(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const currencyName = interaction.options.getString('currency');
   const amountStr = interaction.options.getString('amount');
   const reason = interaction.options.getString('reason') || 'Manual addition';
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -203,10 +208,11 @@ async function handleAdd(interaction) {
   nation.economy.currencies.set(currencyName, newAmount);
   await nation.save();
 
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
 
   // Log transaction
   await Transaction.create({
+    guildId,
     type: 'adjustment',
     to: { nation: nation._id, nationName: nation.name },
     currency: currencyName,
@@ -218,6 +224,7 @@ async function handleAdd(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -236,12 +243,13 @@ async function handleAdd(interaction) {
 async function handleRemove(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const currencyName = interaction.options.getString('currency');
   const amountStr = interaction.options.getString('amount');
   const reason = interaction.options.getString('reason') || 'Manual removal';
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -259,10 +267,11 @@ async function handleRemove(interaction) {
   nation.economy.currencies.set(currencyName, newAmount);
   await nation.save();
 
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
 
   // Log transaction
   await Transaction.create({
+    guildId,
     type: 'expense',
     from: { nation: nation._id, nationName: nation.name },
     currency: currencyName,
@@ -274,6 +283,7 @@ async function handleRemove(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -293,11 +303,12 @@ async function handleRemove(interaction) {
 async function handleIncome(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const currencyName = interaction.options.getString('currency');
   const amountStr = interaction.options.getString('amount');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -313,6 +324,7 @@ async function handleIncome(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -331,9 +343,11 @@ async function handleIncome(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));

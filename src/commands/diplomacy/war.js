@@ -120,13 +120,14 @@ export async function execute(interaction) {
 async function handleDeclare(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const name = interaction.options.getString('name');
   const aggressorName = interaction.options.getString('aggressor');
   const defenderName = interaction.options.getString('defender');
   const reason = interaction.options.getString('reason') || '';
 
-  const aggressor = await Nation.findOne({ name: { $regex: new RegExp(`^${aggressorName}$`, 'i') } });
-  const defender = await Nation.findOne({ name: { $regex: new RegExp(`^${defenderName}$`, 'i') } });
+  const aggressor = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${aggressorName}$`, 'i') } });
+  const defender = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${defenderName}$`, 'i') } });
 
   if (!aggressor) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${aggressorName}** not found.`)], ephemeral: true });
@@ -136,6 +137,7 @@ async function handleDeclare(interaction) {
   }
 
   const war = await War.create({
+    guildId,
     name,
     aggressors: [{ nation: aggressor._id, nationName: aggressor.name }],
     defenders: [{ nation: defender._id, nationName: defender.name }],
@@ -144,6 +146,7 @@ async function handleDeclare(interaction) {
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'war',
     entityId: war._id,
     entityName: war.name,
@@ -162,11 +165,13 @@ async function handleDeclare(interaction) {
 async function handleJoin(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const warName = interaction.options.getString('war');
   const nationName = interaction.options.getString('nation');
   const side = interaction.options.getString('side');
 
   const war = await War.findOne({ 
+    guildId,
     name: { $regex: new RegExp(`^${warName}$`, 'i') },
     status: 'active'
   });
@@ -175,7 +180,7 @@ async function handleJoin(interaction) {
     return interaction.reply({ embeds: [errorEmbed(`Active war **${warName}** not found.`)], ephemeral: true });
   }
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -192,6 +197,7 @@ async function handleJoin(interaction) {
   await war.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'war',
     entityId: war._id,
     entityName: war.name,
@@ -207,10 +213,12 @@ async function handleJoin(interaction) {
 async function handleEnd(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const warName = interaction.options.getString('war');
   const outcome = interaction.options.getString('outcome');
 
   const war = await War.findOne({ 
+    guildId,
     name: { $regex: new RegExp(`^${warName}$`, 'i') },
     status: 'active'
   });
@@ -225,6 +233,7 @@ async function handleEnd(interaction) {
   await war.save();
 
   await createAuditLog({
+    guildId,
     entityType: 'war',
     entityId: war._id,
     entityName: war.name,
@@ -241,8 +250,9 @@ async function handleEnd(interaction) {
 }
 
 async function handleView(interaction) {
+  const guildId = interaction.guildId;
   const warName = interaction.options.getString('war');
-  const war = await War.findOne({ name: { $regex: new RegExp(`^${warName}$`, 'i') } });
+  const war = await War.findOne({ guildId, name: { $regex: new RegExp(`^${warName}$`, 'i') } });
 
   if (!war) {
     return interaction.reply({ embeds: [errorEmbed(`War **${warName}** not found.`)], ephemeral: true });
@@ -252,9 +262,10 @@ async function handleView(interaction) {
 }
 
 async function handleList(interaction) {
+  const guildId = interaction.guildId;
   const activeOnly = interaction.options.getBoolean('active_only') ?? true;
   
-  const query = activeOnly ? { status: 'active' } : {};
+  const query = activeOnly ? { guildId, status: 'active' } : { guildId };
   const wars = await War.find(query).sort({ startedAt: -1 });
 
   if (wars.length === 0) {
@@ -281,10 +292,11 @@ async function handleList(interaction) {
 async function handleNote(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const warName = interaction.options.getString('war');
   const noteContent = interaction.options.getString('note');
 
-  const war = await War.findOne({ name: { $regex: new RegExp(`^${warName}$`, 'i') } });
+  const war = await War.findOne({ guildId, name: { $regex: new RegExp(`^${warName}$`, 'i') } });
   if (!war) {
     return interaction.reply({ embeds: [errorEmbed(`War **${warName}** not found.`)], ephemeral: true });
   }
@@ -300,14 +312,17 @@ async function handleNote(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'aggressor' || focusedOption.name === 'defender' || focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));
   } else if (focusedOption.name === 'war') {
     const wars = await War.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' }
     }).limit(25);
     await interaction.respond(wars.map(w => ({ name: `${w.name} (${w.status})`, value: w.name })));

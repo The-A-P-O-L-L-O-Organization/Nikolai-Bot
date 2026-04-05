@@ -158,6 +158,7 @@ async function handleInfo(interaction) {
 async function handleCreate(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const name = interaction.options.getString('name');
   const category = interaction.options.getString('category');
   const productionTime = interaction.options.getInteger('production_time') || 1;
@@ -169,6 +170,7 @@ async function handleCreate(interaction) {
   }
 
   await Unit.create({
+    guildId,
     name,
     category,
     productionTime,
@@ -177,6 +179,7 @@ async function handleCreate(interaction) {
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'unit',
     entityName: name,
     action: 'create',
@@ -191,6 +194,7 @@ async function handleCreate(interaction) {
 async function handleDelete(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const unitName = interaction.options.getString('name');
   const unit = await Unit.findOne({ name: { $regex: new RegExp(`^${unitName}$`, 'i') } });
 
@@ -205,6 +209,7 @@ async function handleDelete(interaction) {
   await Unit.deleteOne({ _id: unit._id });
 
   await createAuditLog({
+    guildId,
     entityType: 'unit',
     entityName: unit.name,
     action: 'delete',

@@ -65,7 +65,8 @@ export async function execute(interaction) {
 }
 
 async function handleView(interaction) {
-  const gameState = await getGameState();
+  const guildId = interaction.guildId;
+  const gameState = await getGameState(guildId);
   
   if (!gameState) {
     return interaction.reply({ embeds: [errorEmbed('Game state not initialized.')], ephemeral: true });
@@ -91,13 +92,15 @@ async function handleView(interaction) {
 }
 
 async function handleTurnChannel(interaction) {
+  const guildId = interaction.guildId;
   const channel = interaction.options.getChannel('channel');
   
-  await updateGameState({
+  await updateGameState(guildId, {
     'settings.turnAnnouncementChannel': channel?.id || null,
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Settings',
     action: 'update',
@@ -118,13 +121,15 @@ async function handleTurnChannel(interaction) {
 }
 
 async function handleYearPerTurn(interaction) {
+  const guildId = interaction.guildId;
   const years = interaction.options.getInteger('years');
   
-  await updateGameState({
+  await updateGameState(guildId, {
     'settings.yearPerTurn': years,
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Settings',
     action: 'update',
@@ -139,13 +144,15 @@ async function handleYearPerTurn(interaction) {
 }
 
 async function handleAutoYear(interaction) {
+  const guildId = interaction.guildId;
   const enabled = interaction.options.getBoolean('enabled');
   
-  await updateGameState({
+  await updateGameState(guildId, {
     'settings.autoAdvanceYear': enabled,
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Settings',
     action: 'update',
@@ -160,13 +167,15 @@ async function handleAutoYear(interaction) {
 }
 
 async function handleEventChance(interaction) {
+  const guildId = interaction.guildId;
   const percent = interaction.options.getInteger('percent');
   
-  await updateGameState({
+  await updateGameState(guildId, {
     'settings.randomEventChance': percent,
   });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Settings',
     action: 'update',

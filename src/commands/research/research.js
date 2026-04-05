@@ -190,10 +190,11 @@ export async function execute(interaction) {
 }
 
 async function handleStart(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const techName = interaction.options.getString('technology');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -275,6 +276,7 @@ async function handleStart(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -305,9 +307,10 @@ async function handleStart(interaction) {
 }
 
 async function handleCancel(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -334,6 +337,7 @@ async function handleCancel(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -352,9 +356,10 @@ async function handleCancel(interaction) {
 }
 
 async function handleStatus(interaction) {
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -504,10 +509,11 @@ async function handleView(interaction) {
 async function handleGrant(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const techName = interaction.options.getString('technology');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -529,6 +535,7 @@ async function handleGrant(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -548,10 +555,11 @@ async function handleGrant(interaction) {
 async function handleRevoke(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const nationName = interaction.options.getString('nation');
   const techName = interaction.options.getString('technology');
 
-  const nation = await Nation.findOne({ name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
+  const nation = await Nation.findOne({ guildId, name: { $regex: new RegExp(`^${nationName}$`, 'i') } });
   if (!nation) {
     return interaction.reply({ embeds: [errorEmbed(`Nation **${nationName}** not found.`)], ephemeral: true });
   }
@@ -573,6 +581,7 @@ async function handleRevoke(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'nation',
     entityId: nation._id,
     entityName: nation.name,
@@ -593,6 +602,7 @@ async function handleRevoke(interaction) {
 async function handleTechCreate(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const name = interaction.options.getString('name');
   const category = interaction.options.getString('category');
   const researchTime = interaction.options.getInteger('research_time') || 3;
@@ -610,6 +620,7 @@ async function handleTechCreate(interaction) {
   }
 
   const tech = await Technology.create({
+    guildId,
     name,
     category,
     description,
@@ -619,6 +630,7 @@ async function handleTechCreate(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'technology',
     entityId: tech._id,
     entityName: tech.name,
@@ -652,6 +664,7 @@ async function handleTechCreate(interaction) {
 async function handleTechDelete(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const techName = interaction.options.getString('technology');
 
   const tech = await Technology.findOne({ name: { $regex: new RegExp(`^${techName}$`, 'i') } });
@@ -663,6 +676,7 @@ async function handleTechDelete(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'technology',
     entityId: tech._id,
     entityName: tech.name,
@@ -680,6 +694,7 @@ async function handleTechDelete(interaction) {
 async function handleTechEdit(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const techName = interaction.options.getString('technology');
   const field = interaction.options.getString('field');
   const value = interaction.options.getString('value');
@@ -710,6 +725,7 @@ async function handleTechEdit(interaction) {
 
   // Audit log
   await createAuditLog({
+    guildId,
     entityType: 'technology',
     entityId: tech._id,
     entityName: tech.name,
@@ -729,9 +745,11 @@ async function handleTechEdit(interaction) {
 
 export async function autocomplete(interaction) {
   const focusedOption = interaction.options.getFocused(true);
+  const guildId = interaction.guildId;
 
   if (focusedOption.name === 'nation') {
     const nations = await Nation.find({
+      guildId,
       name: { $regex: focusedOption.value, $options: 'i' },
     }).limit(25);
     await interaction.respond(nations.map(n => ({ name: n.name, value: n.name })));

@@ -42,7 +42,8 @@ export async function execute(interaction) {
 }
 
 async function handleView(interaction) {
-  const gameState = await getGameState();
+  const guildId = interaction.guildId;
+  const gameState = await getGameState(guildId);
   
   if (!gameState) {
     return interaction.reply({ embeds: [errorEmbed('Game state not initialized.')], ephemeral: true });
@@ -63,13 +64,15 @@ async function handleView(interaction) {
 async function handleSet(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const newYear = interaction.options.getInteger('year');
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
   const oldYear = gameState?.year || 0;
 
-  await updateGameState({ year: newYear });
+  await updateGameState(guildId, { year: newYear });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Year',
     action: 'update',
@@ -87,14 +90,16 @@ async function handleSet(interaction) {
 async function handleAdvance(interaction) {
   if (!requireGM(interaction)) return;
 
+  const guildId = interaction.guildId;
   const years = interaction.options.getInteger('years') || 1;
-  const gameState = await getGameState();
+  const gameState = await getGameState(guildId);
   const oldYear = gameState?.year || 0;
   const newYear = oldYear + years;
 
-  await updateGameState({ year: newYear });
+  await updateGameState(guildId, { year: newYear });
 
   await createAuditLog({
+    guildId,
     entityType: 'gamestate',
     entityName: 'Year',
     action: 'update',

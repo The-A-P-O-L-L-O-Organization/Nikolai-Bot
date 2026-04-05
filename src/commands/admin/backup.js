@@ -21,16 +21,19 @@ export async function execute(interaction) {
 
   await interaction.deferReply();
 
+  const guildId = interaction.guildId;
+
   try {
     // Gather all data
     const data = {
       exportedAt: new Date().toISOString(),
-      gameState: await getGameState(),
-      nations: await Nation.find().lean(),
-      wars: await War.find().lean(),
-      treaties: await Treaty.find().lean(),
-      resources: await Resource.find().lean(),
-      units: await Unit.find().lean(),
+      guildId,
+      gameState: await getGameState(guildId),
+      nations: await Nation.find({ guildId }).lean(),
+      wars: await War.find({ guildId }).lean(),
+      treaties: await Treaty.find({ guildId }).lean(),
+      resources: await Resource.find({ $or: [{ guildId }, { guildId: null }] }).lean(),
+      units: await Unit.find({ $or: [{ guildId }, { guildId: null }] }).lean(),
     };
 
     // Convert to JSON
@@ -38,7 +41,7 @@ export async function execute(interaction) {
 
     // Save to file
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `backup-${timestamp}.json`;
+    const filename = `backup-${guildId}-${timestamp}.json`;
     const filepath = path.join(process.cwd(), 'backups', filename);
 
     // Ensure backups directory exists
@@ -47,6 +50,7 @@ export async function execute(interaction) {
 
     // Audit log
     await createAuditLog({
+      guildId,
       entityType: 'gamestate',
       entityName: 'Backup',
       action: 'create',
