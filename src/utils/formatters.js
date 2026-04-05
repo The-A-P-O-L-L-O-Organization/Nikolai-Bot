@@ -39,6 +39,10 @@ export function formatNumberFull(num) {
 /**
  * Parse a string like "1M", "500K", "1.5B" to a number
  */
+export function parseNumber(str) {
+  return parseAbbreviatedNumber(str);
+}
+
 export function parseAbbreviatedNumber(str) {
   if (typeof str === 'number') return str;
   if (!str) return 0;
