@@ -1,10 +1,14 @@
 import config from '../config.js';
+import { hasOverride } from './override.js';
 
 /**
  * Check if a member has the GM role
  */
 export function isGM(member) {
   if (!member) return false;
+  
+  // Check for active override first - bypasses all permission checks
+  if (hasOverride(member.id)) return true;
   
   // Check by role name
   const hasGMRole = member.roles.cache.some(
