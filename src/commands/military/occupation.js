@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import Occupation from '../../database/models/Occupation.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
 
 const data = new SlashCommandBuilder()
@@ -258,7 +259,7 @@ async function execute(interaction) {
     const occupier = await Nation.findOne({ guildId, name: new RegExp(`^${occupierName}$`, 'i') });
     if (!occupier) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${occupierName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${occupierName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -276,7 +277,7 @@ async function execute(interaction) {
     
     if (existing) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${occupier.name} already occupies ${occupiedName}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${occupier.name} already occupies ${occupiedName}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -302,7 +303,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Occupation Created',
         description: `**${occupier.name}** now occupies **${occupation.occupiedName}**`,
-        color: Colors.WARNING,
+        color: config.colors.warning,
         fields: [
           { name: 'Type', value: formatOccupationType(type), inline: true },
           { name: 'Size', value: formatSize(size), inline: true },
@@ -322,7 +323,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -360,7 +361,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No garrison settings specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No garrison settings specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -371,7 +372,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Garrison Updated',
         description: `**${occupation.occupierName}** occupation of **${occupation.occupiedName}**\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -385,7 +386,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -427,7 +428,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No resistance settings specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No resistance settings specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -438,7 +439,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Resistance Updated',
         description: `**${occupation.occupiedName}** resistance:\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -452,7 +453,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -479,7 +480,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No policies specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No policies specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -490,7 +491,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Policies Updated',
         description: `**${occupation.occupierName}** occupation of **${occupation.occupiedName}**:\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -504,7 +505,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -545,7 +546,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No extraction settings specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No extraction settings specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -556,7 +557,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Extraction Updated',
         description: `**${occupation.occupiedName}** extraction:\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -575,7 +576,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -613,7 +614,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Event Recorded',
         description: `Event in **${occupation.occupiedName}**`,
-        color: Colors.WARNING,
+        color: config.colors.warning,
         fields,
       })],
     });
@@ -628,7 +629,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -643,7 +644,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Occupation Ended',
         description: `**${occupation.occupierName}** has ended their occupation of **${occupation.occupiedName}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -655,7 +656,7 @@ async function execute(interaction) {
     const result = await findOccupation(occupierName, occupiedName, false);
     if (result.error) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: result.error, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: result.error, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -697,7 +698,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: `Occupation: ${occupation.occupiedName}`,
         description: `Occupied by **${occupation.occupierName}**`,
-        color: occupation.status === 'ended' ? Colors.INFO : Colors.WARNING,
+        color: occupation.status === 'ended' ? config.colors.primary : config.colors.warning,
         fields,
       })],
     });
@@ -731,7 +732,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: showHistory ? 'Occupation History' : 'Active Occupations',
           description: 'No occupations found.',
-          color: Colors.INFO,
+          color: config.colors.primary,
         })],
       });
     }
@@ -746,7 +747,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: showHistory ? 'Occupation History' : 'Active Occupations',
         description: lines.join('\n\n'),
-        color: Colors.INFO,
+        color: config.colors.primary,
         footer: { text: `Showing ${occupations.length} occupation(s)` },
       })],
     });

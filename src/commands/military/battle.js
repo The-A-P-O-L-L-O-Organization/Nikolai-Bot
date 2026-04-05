@@ -3,7 +3,8 @@ import Battle from '../../database/models/Battle.js';
 import Nation from '../../database/models/Nation.js';
 import Doctrine from '../../database/models/Doctrine.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
 
 const data = new SlashCommandBuilder()
@@ -242,7 +243,7 @@ async function execute(interaction) {
     const attacker = await Nation.findOne({ guildId, name: new RegExp(`^${attackerName}$`, 'i') });
     if (!attacker) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${attackerName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${attackerName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -250,7 +251,7 @@ async function execute(interaction) {
     const defender = await Nation.findOne({ guildId, name: new RegExp(`^${defenderName}$`, 'i') });
     if (!defender) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${defenderName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${defenderName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -259,7 +260,7 @@ async function execute(interaction) {
     const existing = await Battle.findOne({ guildId, name });
     if (existing) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${name}" already exists.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${name}" already exists.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -297,7 +298,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: 'Battle Created',
       description: `**${name}**\n${attacker.name} vs ${defender.name}`,
-      color: Colors.WARNING,
+      color: config.colors.warning,
       fields: [
         { name: 'Type', value: formatBattleType(battleType), inline: true },
         { name: 'Terrain', value: formatTerrain(terrain), inline: true },
@@ -321,7 +322,7 @@ async function execute(interaction) {
     const quantity = parseNumber(quantityStr);
     if (quantity === null || quantity <= 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: 'Invalid quantity.', color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: 'Invalid quantity.', color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -329,7 +330,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName, status: 'setup' });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -349,7 +350,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Forces Updated',
         description: `**${battle.name}** - ${side === 'attacker' ? battle.attacker.nationName : battle.defender.nationName}\nAdded ${formatNumber(quantity)} ${unitType} (Quality: ${quality}%)`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -363,7 +364,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName, status: 'setup' });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -393,7 +394,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -404,7 +405,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Modifiers Updated',
         description: `**${battle.name}** - ${side === 'attacker' ? battle.attacker.nationName : battle.defender.nationName}\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -419,7 +420,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -431,7 +432,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Commander Set',
         description: `**${battle.name}** - ${side === 'attacker' ? battle.attacker.nationName : battle.defender.nationName}\nCommander: ${commanderName}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -444,7 +445,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName, status: 'setup' });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found or already simulated.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -539,7 +540,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `${victorEmoji} Battle Result: ${battle.name}`,
       description: generateBattleNarrative(battle),
-      color: victor.includes('attacker') ? Colors.ERROR : victor.includes('defender') ? Colors.SUCCESS : Colors.WARNING,
+      color: victor.includes('attacker') ? config.colors.error : victor.includes('defender') ? config.colors.success : config.colors.warning,
       fields: [
         { name: `${battle.attacker.nationName} (Attacker)`, value: `Score: ${attackerScore}\nCasualties: ${formatNumber(battle.attacker.casualties)} (${attackerCasualtyRate}%)`, inline: true },
         { name: `${battle.defender.nationName} (Defender)`, value: `Score: ${defenderScore}\nCasualties: ${formatNumber(battle.defender.casualties)} (${defenderCasualtyRate}%)`, inline: true },
@@ -564,7 +565,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -591,7 +592,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `Battle Resolved: ${battle.name}`,
       description: narrative || `${battle.attacker.nationName} vs ${battle.defender.nationName}`,
-      color: Colors.SUCCESS,
+      color: config.colors.success,
       fields: [
         { name: 'Victor', value: formatVictor(victor), inline: true },
         { name: 'Decisiveness', value: formatDecisiveness(decisiveness), inline: true },
@@ -609,7 +610,7 @@ async function execute(interaction) {
     const battle = await Battle.findOne({ guildId, name: battleName });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -639,7 +640,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `Battle: ${battle.name}`,
       description: battle.location ? `Location: ${battle.location}` : '',
-      color: battle.status === 'setup' ? Colors.WARNING : Colors.INFO,
+      color: battle.status === 'setup' ? config.colors.warning : config.colors.primary,
       fields,
       footer: { text: `Created: ${battle.createdAt.toLocaleDateString()}${battle.resolvedAt ? ` | Resolved: ${battle.resolvedAt.toLocaleDateString()}` : ''}` },
     });
@@ -667,7 +668,7 @@ async function execute(interaction) {
     
     if (battles.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Battles', description: 'No battles found.', color: Colors.INFO })],
+        embeds: [createEmbed({ title: 'Battles', description: 'No battles found.', color: config.colors.primary })],
       });
     }
     
@@ -680,7 +681,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: 'Battles',
       description: lines.join('\n\n'),
-      color: Colors.INFO,
+      color: config.colors.primary,
       footer: { text: `Showing ${battles.length} battle(s)` },
     });
     
@@ -695,13 +696,13 @@ async function execute(interaction) {
     const battle = await Battle.findOneAndDelete({ guildId, name: battleName });
     if (!battle) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Battle "${battleName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
     
     return interaction.reply({
-      embeds: [createEmbed({ title: 'Battle Deleted', description: `Deleted battle: **${battleName}**`, color: Colors.SUCCESS })],
+      embeds: [createEmbed({ title: 'Battle Deleted', description: `Deleted battle: **${battleName}**`, color: config.colors.success })],
     });
   }
 }

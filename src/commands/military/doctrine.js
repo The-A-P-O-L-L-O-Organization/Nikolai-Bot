@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import Doctrine from '../../database/models/Doctrine.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 
 const data = new SlashCommandBuilder()
   .setName('doctrine')
@@ -166,7 +167,7 @@ async function execute(interaction) {
       const existing = await Doctrine.findOne({ guildId, name, isTemplate: true });
       if (existing) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" already exists.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" already exists.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -186,7 +187,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Doctrine Template Created',
           description: `Created doctrine: **${name}**`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
           fields: [
             { name: 'Category', value: formatCategory(category), inline: true },
             { name: 'Description', value: description || 'None', inline: false },
@@ -204,13 +205,13 @@ async function execute(interaction) {
       const template = await Doctrine.findOneAndDelete({ guildId, name, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
       
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Template Deleted', description: `Deleted: **${name}**`, color: Colors.SUCCESS })],
+        embeds: [createEmbed({ title: 'Template Deleted', description: `Deleted: **${name}**`, color: config.colors.success })],
       });
     }
     
@@ -219,7 +220,7 @@ async function execute(interaction) {
       
       if (templates.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Doctrine Templates', description: 'No templates created yet.', color: Colors.INFO })],
+          embeds: [createEmbed({ title: 'Doctrine Templates', description: 'No templates created yet.', color: config.colors.primary })],
         });
       }
       
@@ -237,7 +238,7 @@ async function execute(interaction) {
       }));
       
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Doctrine Templates', fields, color: Colors.INFO })],
+        embeds: [createEmbed({ title: 'Doctrine Templates', fields, color: config.colors.primary })],
       });
     }
     
@@ -247,7 +248,7 @@ async function execute(interaction) {
       const template = await Doctrine.findOne({ guildId, name, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -277,7 +278,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: `Doctrine: ${template.name}`,
           description: template.description || 'No description',
-          color: Colors.INFO,
+          color: config.colors.primary,
           fields,
         })],
       });
@@ -294,7 +295,7 @@ async function execute(interaction) {
       const template = await Doctrine.findOne({ guildId, name: templateName, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -326,7 +327,7 @@ async function execute(interaction) {
       
       if (changes.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers specified.', color: Colors.WARNING })],
+          embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers specified.', color: config.colors.warning })],
           ephemeral: true,
         });
       }
@@ -337,7 +338,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Modifiers Updated',
           description: `Updated **${templateName}**:\n${changes.join('\n')}`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
         })],
       });
     }
@@ -353,7 +354,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -361,7 +362,7 @@ async function execute(interaction) {
     const template = await Doctrine.findOne({ guildId, name: templateName, isTemplate: true });
     if (!template) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -391,7 +392,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Doctrine Assigned',
         description: `**${nation.name}** now follows the **${template.name}** doctrine.`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -404,7 +405,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -412,7 +413,7 @@ async function execute(interaction) {
     const deleted = await Doctrine.findOneAndDelete({ guildId, assignedTo: nation._id, isTemplate: false });
     if (!deleted) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${nation.name} has no assigned doctrine.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${nation.name} has no assigned doctrine.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -421,7 +422,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Doctrine Removed',
         description: `Removed **${deleted.name}** doctrine from **${nation.name}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -432,7 +433,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -443,7 +444,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: `${nation.name} - Doctrine`,
           description: 'No military doctrine assigned.',
-          color: Colors.INFO,
+          color: config.colors.primary,
         })],
       });
     }
@@ -467,7 +468,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: `${nation.name} - ${doctrine.name} Doctrine`,
         description: doctrine.description || 'No description',
-        color: Colors.INFO,
+        color: config.colors.primary,
         fields,
       })],
     });
@@ -484,7 +485,7 @@ async function execute(interaction) {
     const template = await Doctrine.findOne({ guildId, name: templateName, isTemplate: true });
     if (!template) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -496,7 +497,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Ability Added',
         description: `Added **${abilityName}** to **${templateName}**\n${description}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }

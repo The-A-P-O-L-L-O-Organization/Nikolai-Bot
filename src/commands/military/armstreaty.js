@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import NuclearTreaty from '../../database/models/NuclearTreaty.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
 
 const data = new SlashCommandBuilder()
@@ -206,7 +207,7 @@ async function execute(interaction) {
     const existing = await NuclearTreaty.findOne({ guildId, name });
     if (existing) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${name}" already exists.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${name}" already exists.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -226,7 +227,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Created',
         description: `Created treaty: **${name}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
         fields: [
           { name: 'Type', value: formatTreatyType(type), inline: true },
           { name: 'Status', value: 'Draft', inline: true },
@@ -244,7 +245,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -271,7 +272,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No terms specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No terms specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -282,7 +283,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Terms Updated',
         description: `**${treatyName}**:\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -296,7 +297,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -310,7 +311,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Weapon Banned',
         description: `**${weapon}** added to banned weapons list in **${treatyName}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -324,7 +325,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -332,7 +333,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -341,7 +342,7 @@ async function execute(interaction) {
     const existing = treaty.signatories.find(s => s.nation?.equals(nation._id));
     if (existing) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is already a signatory.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is already a signatory.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -362,7 +363,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Nation Invited',
         description: `**${nation.name}** has been invited to join **${treatyName}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -376,7 +377,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -384,7 +385,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -413,7 +414,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Signed',
         description: `**${nation.name}** has signed **${treatyName}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -427,7 +428,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -435,7 +436,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -443,7 +444,7 @@ async function execute(interaction) {
     const signatory = treaty.signatories.find(s => s.nation?.equals(nation._id));
     if (!signatory) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is not a signatory of this treaty.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is not a signatory of this treaty.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -456,7 +457,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Ratified',
         description: `**${nation.name}** has ratified **${treatyName}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -470,7 +471,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -478,7 +479,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -486,7 +487,7 @@ async function execute(interaction) {
     const signatory = treaty.signatories.find(s => s.nation?.equals(nation._id));
     if (!signatory) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is not a signatory.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${nation.name} is not a signatory.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -499,7 +500,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Withdrawal',
         description: `**${nation.name}** has withdrawn from **${treatyName}**`,
-        color: Colors.WARNING,
+        color: config.colors.warning,
       })],
     });
   }
@@ -516,7 +517,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -524,7 +525,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -551,7 +552,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Violation Recorded',
         description: `**${nation.name}** has violated **${treatyName}**`,
-        color: Colors.ERROR,
+        color: config.colors.error,
         fields: [
           { name: 'Violation', value: description, inline: false },
           { name: 'Severity', value: severity.charAt(0).toUpperCase() + severity.slice(1), inline: true },
@@ -569,7 +570,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -584,7 +585,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Activated',
         description: `**${treatyName}** is now in effect`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
         fields: [
           { name: 'Ratified By', value: `${ratifiedCount} nation(s)`, inline: true },
           { name: 'Effective Date', value: new Date().toLocaleDateString(), inline: true },
@@ -601,7 +602,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -613,7 +614,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Treaty Collapsed',
         description: `**${treatyName}** has collapsed and is no longer in effect`,
-        color: Colors.ERROR,
+        color: config.colors.error,
       })],
     });
   }
@@ -624,7 +625,7 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOne({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -672,7 +673,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `Treaty: ${treaty.name}`,
       description: treaty.description || 'No description',
-      color: treaty.status === 'active' ? Colors.SUCCESS : treaty.status === 'collapsed' ? Colors.ERROR : Colors.INFO,
+      color: treaty.status === 'active' ? config.colors.success : treaty.status === 'collapsed' ? config.colors.error : config.colors.primary,
       fields,
       footer: { text: `Created: ${treaty.createdAt.toLocaleDateString()}${treaty.effectiveDate ? ` | Effective: ${treaty.effectiveDate.toLocaleDateString()}` : ''}` },
     });
@@ -696,7 +697,7 @@ async function execute(interaction) {
     
     if (treaties.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Arms Treaties', description: 'No treaties found.', color: Colors.INFO })],
+        embeds: [createEmbed({ title: 'Arms Treaties', description: 'No treaties found.', color: config.colors.primary })],
       });
     }
     
@@ -710,7 +711,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Arms Control Treaties',
         description: lines.join('\n\n'),
-        color: Colors.INFO,
+        color: config.colors.primary,
         footer: { text: `Showing ${treaties.length} treaty/treaties` },
       })],
     });
@@ -724,13 +725,13 @@ async function execute(interaction) {
     const treaty = await NuclearTreaty.findOneAndDelete({ guildId, name: treatyName });
     if (!treaty) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Treaty "${treatyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
     
     return interaction.reply({
-      embeds: [createEmbed({ title: 'Treaty Deleted', description: `Deleted: **${treatyName}**`, color: Colors.SUCCESS })],
+      embeds: [createEmbed({ title: 'Treaty Deleted', description: `Deleted: **${treatyName}**`, color: config.colors.success })],
     });
   }
 }

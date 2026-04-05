@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { GovernmentType } from '../../database/models/Government.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 
 const data = new SlashCommandBuilder()
   .setName('government')
@@ -168,7 +169,7 @@ async function execute(interaction) {
       const existing = await GovernmentType.findOne({ guildId, name, isTemplate: true });
       if (existing) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" already exists.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" already exists.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -188,7 +189,7 @@ async function execute(interaction) {
       const embed = createEmbed({
         title: 'Government Template Created',
         description: `Created government type template: **${name}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
         fields: [
           { name: 'Category', value: formatCategory(category), inline: true },
           { name: 'Succession', value: formatSuccession(succession), inline: true },
@@ -207,13 +208,13 @@ async function execute(interaction) {
       const template = await GovernmentType.findOneAndDelete({ guildId, name, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
       
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Template Deleted', description: `Deleted template: **${name}**`, color: Colors.SUCCESS })],
+        embeds: [createEmbed({ title: 'Template Deleted', description: `Deleted template: **${name}**`, color: config.colors.success })],
       });
     }
     
@@ -222,7 +223,7 @@ async function execute(interaction) {
       
       if (templates.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Government Templates', description: 'No templates created yet.', color: Colors.INFO })],
+          embeds: [createEmbed({ title: 'Government Templates', description: 'No templates created yet.', color: config.colors.primary })],
         });
       }
       
@@ -240,7 +241,7 @@ async function execute(interaction) {
       }));
       
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Government Templates', fields, color: Colors.INFO })],
+        embeds: [createEmbed({ title: 'Government Templates', fields, color: config.colors.primary })],
       });
     }
     
@@ -250,7 +251,7 @@ async function execute(interaction) {
       const template = await GovernmentType.findOne({ guildId, name, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -258,7 +259,7 @@ async function execute(interaction) {
       const embed = createEmbed({
         title: `Government Type: ${template.name}`,
         description: template.description || 'No description',
-        color: Colors.INFO,
+        color: config.colors.primary,
         fields: [
           { name: 'Category', value: formatCategory(template.category), inline: true },
           { name: 'Succession', value: formatSuccession(template.succession), inline: true },
@@ -288,7 +289,7 @@ async function execute(interaction) {
       const template = await GovernmentType.findOne({ guildId, name: templateName, isTemplate: true });
       if (!template) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -314,7 +315,7 @@ async function execute(interaction) {
       
       if (changes.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers were specified.', color: Colors.WARNING })],
+          embeds: [createEmbed({ title: 'No Changes', description: 'No modifiers were specified.', color: config.colors.warning })],
           ephemeral: true,
         });
       }
@@ -325,7 +326,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Modifiers Updated',
           description: `Updated **${templateName}**:\n${changes.join('\n')}`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
         })],
       });
     }
@@ -341,7 +342,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -349,7 +350,7 @@ async function execute(interaction) {
     const template = await GovernmentType.findOne({ guildId, name: templateName, isTemplate: true });
     if (!template) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Template "${templateName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -377,7 +378,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Government Assigned',
         description: `**${nation.name}** now has government type: **${template.name}** (${formatCategory(template.category)})`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -390,7 +391,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -398,7 +399,7 @@ async function execute(interaction) {
     const deleted = await GovernmentType.findOneAndDelete({ guildId, assignedTo: nation._id, isTemplate: false });
     if (!deleted) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${nation.name} has no assigned government type.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${nation.name} has no assigned government type.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -407,7 +408,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Government Removed',
         description: `Removed **${deleted.name}** government type from **${nation.name}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -418,7 +419,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -429,7 +430,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: `${nation.name} - Government`,
           description: 'No government type assigned.',
-          color: Colors.INFO,
+          color: config.colors.primary,
         })],
       });
     }
@@ -437,7 +438,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `${nation.name} - Government`,
       description: `**${gov.name}**\n${gov.description || 'No description'}`,
-      color: Colors.INFO,
+      color: config.colors.primary,
       fields: [
         { name: 'Category', value: formatCategory(gov.category), inline: true },
         { name: 'Succession', value: formatSuccession(gov.succession), inline: true },

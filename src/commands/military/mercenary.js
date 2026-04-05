@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { MercenaryCompany, MercenaryContract } from '../../database/models/Mercenary.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
 
 const data = new SlashCommandBuilder()
@@ -261,7 +262,7 @@ async function execute(interaction) {
       const existing = await MercenaryCompany.findOne({ guildId, name });
       if (existing) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" already exists.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" already exists.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -282,7 +283,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Mercenary Company Created',
           description: `Created: **${name}**${motto ? `\n*"${motto}"*` : ''}`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
           fields: [
             { name: 'Type', value: formatCompanyType(type), inline: true },
             { name: 'Status', value: 'Available for hire', inline: true },
@@ -300,13 +301,13 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOneAndDelete({ guildId, name });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
       
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Company Deleted', description: `Deleted: **${name}**`, color: Colors.SUCCESS })],
+        embeds: [createEmbed({ title: 'Company Deleted', description: `Deleted: **${name}**`, color: config.colors.success })],
       });
     }
     
@@ -325,7 +326,7 @@ async function execute(interaction) {
           embeds: [createEmbed({
             title: 'Mercenary Companies',
             description: availableOnly ? 'No available companies.' : 'No companies registered.',
-            color: Colors.INFO,
+            color: config.colors.primary,
           })],
         });
       }
@@ -341,7 +342,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Mercenary Companies',
           description: lines.join('\n\n'),
-          color: Colors.INFO,
+          color: config.colors.primary,
           footer: { text: `Showing ${companies.length} company/companies` },
         })],
       });
@@ -353,7 +354,7 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOne({ guildId, name });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${name}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -401,7 +402,7 @@ async function execute(interaction) {
       const embed = createEmbed({
         title: company.name,
         description: `${company.description || 'No description'}${company.motto ? `\n*"${company.motto}"*` : ''}`,
-        color: company.status === 'available' ? Colors.SUCCESS : Colors.INFO,
+        color: company.status === 'available' ? config.colors.success : config.colors.primary,
         fields,
       });
       
@@ -419,7 +420,7 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOne({ guildId, name: companyName });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -464,7 +465,7 @@ async function execute(interaction) {
       
       if (changes.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'No Changes', description: 'No force values specified.', color: Colors.WARNING })],
+          embeds: [createEmbed({ title: 'No Changes', description: 'No force values specified.', color: config.colors.warning })],
           ephemeral: true,
         });
       }
@@ -475,7 +476,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Forces Updated',
           description: `**${companyName}**:\n${changes.join('\n')}\n\n**Total: ${formatNumber(company.forces.total)}**`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
         })],
       });
     }
@@ -491,7 +492,7 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOne({ guildId, name: companyName });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -512,7 +513,7 @@ async function execute(interaction) {
       
       if (changes.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'No Changes', description: 'No ratings specified.', color: Colors.WARNING })],
+          embeds: [createEmbed({ title: 'No Changes', description: 'No ratings specified.', color: config.colors.warning })],
           ephemeral: true,
         });
       }
@@ -523,7 +524,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Ratings Updated',
           description: `**${companyName}**:\n${changes.join('\n')}`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
         })],
       });
     }
@@ -539,7 +540,7 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOne({ guildId, name: companyName });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -570,7 +571,7 @@ async function execute(interaction) {
       
       if (changes.length === 0) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'No Changes', description: 'No pricing specified.', color: Colors.WARNING })],
+          embeds: [createEmbed({ title: 'No Changes', description: 'No pricing specified.', color: config.colors.warning })],
           ephemeral: true,
         });
       }
@@ -581,7 +582,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: 'Pricing Updated',
           description: `**${companyName}**:\n${changes.join('\n')}`,
-          color: Colors.SUCCESS,
+          color: config.colors.success,
         })],
       });
     }
@@ -599,14 +600,14 @@ async function execute(interaction) {
     const company = await MercenaryCompany.findOne({ guildId, name: companyName });
     if (!company) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
     
     if (company.status !== 'available') {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${companyName} is not available for hire.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${companyName} is not available for hire.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -614,7 +615,7 @@ async function execute(interaction) {
     const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
     if (!nation) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -656,7 +657,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Mercenary Company Hired',
         description: `**${nation.name}** has hired **${company.name}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
         fields: [
           { name: 'Mission', value: mission || 'General service', inline: false },
           { name: 'Duration', value: `${duration} turns`, inline: true },
@@ -677,14 +678,14 @@ async function execute(interaction) {
     const company = await MercenaryCompany.findOne({ guildId, name: companyName });
     if (!company) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
     
     if (company.status !== 'contracted') {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `${companyName} is not under contract.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `${companyName} is not under contract.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -728,7 +729,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Contract Ended',
         description: `**${company.name}** released from service with **${previousEmployer}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
         fields: [
           { name: 'Reason', value: formatReleaseReason(reason), inline: true },
           { name: 'Status', value: formatStatus(company.status), inline: true },
@@ -747,7 +748,7 @@ async function execute(interaction) {
     const company = await MercenaryCompany.findOne({ guildId, name: companyName });
     if (!company) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -760,7 +761,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Commander Set',
         description: `**${company.name}** commander: **${commanderName}**${background ? `\n${background}` : ''}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -774,7 +775,7 @@ async function execute(interaction) {
     const company = await MercenaryCompany.findOne({ guildId, name: companyName });
     if (!company) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -788,7 +789,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Specialization Added',
         description: `**${company.name}** now specializes in: **${formatSpecialization(spec)}**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -799,7 +800,7 @@ async function execute(interaction) {
     
     if (!companyName && !nationName) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: 'Specify either a company or nation.', color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: 'Specify either a company or nation.', color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -811,7 +812,7 @@ async function execute(interaction) {
       const company = await MercenaryCompany.findOne({ guildId, name: companyName });
       if (!company) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Company "${companyName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -823,7 +824,7 @@ async function execute(interaction) {
       const nation = await Nation.findOne({ guildId, name: new RegExp(`^${nationName}$`, 'i') });
       if (!nation) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Nation "${nationName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -835,7 +836,7 @@ async function execute(interaction) {
     
     if (contracts.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title, description: 'No contracts found.', color: Colors.INFO })],
+        embeds: [createEmbed({ title, description: 'No contracts found.', color: config.colors.primary })],
       });
     }
     
@@ -851,7 +852,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title,
         description: lines.join('\n\n'),
-        color: Colors.INFO,
+        color: config.colors.primary,
         footer: { text: `Showing ${contracts.length} contract(s)` },
       })],
     });

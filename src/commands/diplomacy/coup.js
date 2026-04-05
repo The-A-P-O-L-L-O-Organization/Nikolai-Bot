@@ -2,7 +2,8 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { CoupAttempt, GovernmentType } from '../../database/models/Government.js';
 import Nation from '../../database/models/Nation.js';
 import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
-import { createEmbed, Colors } from '../../utils/embeds.js';
+import { createEmbed } from '../../utils/embeds.js';
+import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
 
 const data = new SlashCommandBuilder()
@@ -163,7 +164,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -172,7 +173,7 @@ async function execute(interaction) {
     const existing = await CoupAttempt.findOne({ guildId, target: target._id, status: { $in: ['planning', 'active'] } });
     if (existing) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `There is already an active coup against ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `There is already an active coup against ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -182,7 +183,7 @@ async function execute(interaction) {
       backer = await Nation.findOne({ guildId, name: new RegExp(`^${backerName}$`, 'i') });
       if (!backer) {
         return interaction.reply({
-          embeds: [createEmbed({ title: 'Error', description: `Backer nation "${backerName}" not found.`, color: Colors.ERROR })],
+          embeds: [createEmbed({ title: 'Error', description: `Backer nation "${backerName}" not found.`, color: config.colors.error })],
           ephemeral: true,
         });
       }
@@ -212,7 +213,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: 'Coup Planned',
       description: `A ${formatCoupType(type)} is being planned against **${target.name}**`,
-      color: Colors.WARNING,
+      color: config.colors.warning,
       fields: [
         { name: 'Coup Leader', value: leader, inline: true },
         { name: 'Type', value: formatCoupType(type), inline: true },
@@ -234,7 +235,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -242,7 +243,7 @@ async function execute(interaction) {
     const coup = await CoupAttempt.findOne({ guildId, target: target._id, status: { $in: ['planning', 'active'] } });
     if (!coup) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -262,7 +263,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No factors specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No factors specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -278,7 +279,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Coup Factors Updated',
         description: `Updated factors for coup against **${target.name}**:\n${changes.join('\n')}\n\n**New Success Chance: ${coup.successChance}%**`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -291,7 +292,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -299,7 +300,7 @@ async function execute(interaction) {
     const coup = await CoupAttempt.findOne({ guildId, target: target._id, status: { $in: ['planning', 'active'] } });
     if (!coup) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -330,7 +331,7 @@ async function execute(interaction) {
     
     if (changes.length === 0) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'No Changes', description: 'No valid resources specified.', color: Colors.WARNING })],
+        embeds: [createEmbed({ title: 'No Changes', description: 'No valid resources specified.', color: config.colors.warning })],
         ephemeral: true,
       });
     }
@@ -341,7 +342,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Coup Resources Updated',
         description: `Updated resources for coup against **${target.name}**:\n${changes.join('\n')}`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -354,7 +355,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -362,7 +363,7 @@ async function execute(interaction) {
     const coup = await CoupAttempt.findOne({ guildId, target: target._id, status: { $in: ['planning', 'active'] } });
     if (!coup) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -392,7 +393,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `${resultEmoji} Coup ${success ? 'Succeeded' : 'Failed'}!`,
       description: `The ${formatCoupType(coup.type)} against **${target.name}** has ${success ? 'succeeded' : 'failed'}!`,
-      color: success ? Colors.SUCCESS : Colors.ERROR,
+      color: success ? config.colors.success : config.colors.error,
       fields: [
         { name: 'Roll', value: `${roll} vs ${coup.successChance}% needed`, inline: true },
         { name: 'Coup Leader', value: `${coup.leader} (${coup.result.leaderSurvived ? 'Survived' : 'Killed/Captured'})`, inline: true },
@@ -415,7 +416,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -424,7 +425,7 @@ async function execute(interaction) {
       .sort({ createdAt: -1 });
     if (!coup) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `No coup found for ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `No coup found for ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -500,7 +501,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `Coup Resolved: ${target.name}`,
       description: `The ${formatCoupType(coup.type)} has been resolved.`,
-      color: success ? Colors.SUCCESS : Colors.ERROR,
+      color: success ? config.colors.success : config.colors.error,
       fields,
     });
     
@@ -515,7 +516,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -528,7 +529,7 @@ async function execute(interaction) {
     
     if (!coup) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `No active coup against ${target.name}.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -537,7 +538,7 @@ async function execute(interaction) {
       embeds: [createEmbed({
         title: 'Coup Cancelled',
         description: `The planned ${formatCoupType(coup.type)} against **${target.name}** has been cancelled.`,
-        color: Colors.SUCCESS,
+        color: config.colors.success,
       })],
     });
   }
@@ -549,7 +550,7 @@ async function execute(interaction) {
     const target = await Nation.findOne({ guildId, name: new RegExp(`^${targetName}$`, 'i') });
     if (!target) {
       return interaction.reply({
-        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: Colors.ERROR })],
+        embeds: [createEmbed({ title: 'Error', description: `Nation "${targetName}" not found.`, color: config.colors.error })],
         ephemeral: true,
       });
     }
@@ -567,7 +568,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: `Coup Status: ${target.name}`,
           description: showHistory ? 'No historical coups found.' : 'No active coup against this nation.',
-          color: Colors.INFO,
+          color: config.colors.primary,
         })],
       });
     }
@@ -619,7 +620,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: `Coup: ${target.name}`,
       description: `${formatCoupType(coup.type)} led by **${coup.leader}**`,
-      color: coup.status === 'succeeded' ? Colors.SUCCESS : coup.status === 'failed' || coup.status === 'crushed' ? Colors.ERROR : Colors.WARNING,
+      color: coup.status === 'succeeded' ? config.colors.success : coup.status === 'failed' || coup.status === 'crushed' ? config.colors.error : config.colors.warning,
       fields,
       footer: { text: `Started: ${coup.createdAt.toLocaleDateString()}${coup.resolvedAt ? ` | Resolved: ${coup.resolvedAt.toLocaleDateString()}` : ''}` },
     });
@@ -643,7 +644,7 @@ async function execute(interaction) {
         embeds: [createEmbed({
           title: showHistory ? 'Historical Coups' : 'Active Coups',
           description: showHistory ? 'No historical coups recorded.' : 'No active coups in progress.',
-          color: Colors.INFO,
+          color: config.colors.primary,
         })],
       });
     }
@@ -657,7 +658,7 @@ async function execute(interaction) {
     const embed = createEmbed({
       title: showHistory ? 'Historical Coups' : 'Active Coups',
       description: lines.join('\n\n'),
-      color: Colors.INFO,
+      color: config.colors.primary,
       footer: { text: `Showing ${coups.length} coup(s)` },
     });
     
