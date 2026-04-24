@@ -38,7 +38,7 @@ async function start() {
     console.log('✅ Connected to MongoDB');
 
     // Initialize game state if not exists
-    await initializeGameState();
+    await initializeGameState(config.discord.guildId);
     console.log('✅ Game state initialized');
 
     // Initialize default resources
