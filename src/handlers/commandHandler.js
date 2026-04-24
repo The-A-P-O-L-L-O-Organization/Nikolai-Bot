@@ -20,9 +20,10 @@ export async function loadCommands(client) {
     
     for (const file of commandFiles.filter(f => f.endsWith('.js'))) {
       const filePath = join(folderPath, file);
-      const command = await import(`file://${filePath}`);
+      const mod = await import(`file://${filePath}`);
+      const command = 'default' in mod ? mod.default : mod;
       
-      if ('data' in command && 'execute' in command) {
+      if (command?.data && command?.execute) {
         client.commands.set(command.data.name, command);
       } else {
         console.warn(`⚠️ Command at ${filePath} is missing required "data" or "execute" export`);
