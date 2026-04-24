@@ -6,9 +6,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-    environment:
+    env_file:
       - .env
-      - MONGODB_URI=mongodb://mongodb:27017/nikolai
     volumes:
       - ./backups:/app/backups
     networks:
