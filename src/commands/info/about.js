@@ -12,14 +12,15 @@ export const data = new SlashCommandBuilder()
   .setDescription('Information about the Nikolai Bot');
 
 export async function execute(interaction) {
-  const gameState = await getGameState();
+  const gameState = await getGameState(interaction.guildId);
   
   // Get statistics
+  const guildFilter = { guildId: interaction.guildId };
   const [nationCount, activeWars, activeTreaties, techCount] = await Promise.all([
-    Nation.countDocuments(),
-    War.countDocuments({ status: 'active' }),
-    Treaty.countDocuments({ status: 'active' }),
-    Technology.countDocuments(),
+    Nation.countDocuments(guildFilter),
+    War.countDocuments({ ...guildFilter, status: 'active' }),
+    Treaty.countDocuments({ ...guildFilter, status: 'active' }),
+    Technology.countDocuments(guildFilter),
   ]);
 
   const embed = createEmbed({
