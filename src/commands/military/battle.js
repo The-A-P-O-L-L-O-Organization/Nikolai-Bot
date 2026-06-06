@@ -707,18 +707,6 @@ async function execute(interaction) {
   }
 }
 
-function calculateForceStrength(forces) {
-  return forces.reduce((total, force) => {
-    const baseStrength = Math.log10(force.quantity + 1) * 10;
-    const qualityMultiplier = force.quality / 50;
-    return total + baseStrength * qualityMultiplier;
-  }, 0);
-}
-
-function sumModifiers(mods) {
-  return Object.values(mods).reduce((sum, val) => sum + (val || 0), 0);
-}
-
 function generateBattleNarrative(battle) {
   const attacker = battle.attacker.nationName;
   const defender = battle.defender.nationName;
