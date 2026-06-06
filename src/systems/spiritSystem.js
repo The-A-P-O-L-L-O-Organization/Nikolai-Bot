@@ -175,11 +175,15 @@ export function getSpiritEffectsSummary(nation) {
     summary.push(`Counterintel Bonus: ${modifiers.diplomacyCounterintelBonus >= 0 ? '+' : ''}${modifiers.diplomacyCounterintelBonus}`);
   }
 
-  if (modifiers.diplomacyPropagandaBonus !== 0) {
-    summary.push(`Propaganda Bonus: ${modifiers.diplomacyPropagandaBonus >= 0 ? '+' : ''}${modifiers.diplomacyPropagandaBonus}`);
-  }
+   if (modifiers.diplomacyPropagandaBonus !== 0) {
+     summary.push(`Propaganda Bonus: ${modifiers.diplomacyPropagandaBonus >= 0 ? '+' : ''}${modifiers.diplomacyPropagandaBonus}`);
+   }
 
-  return summary;
+   if (modifiers.diplomacyBonus !== 0) {
+     summary.push(`General Diplomacy Bonus: ${modifiers.diplomacyBonus >= 0 ? '+' : ''}${modifiers.diplomacyBonus}`);
+   }
+
+   return summary;
 }
 
 /**
