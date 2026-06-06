@@ -6,6 +6,12 @@ import { requireGM, canModifyNation, isGM } from '../../utils/permissions.js';
 import { createEmbed } from '../../utils/embeds.js';
 import config from '../../config.js';
 import { formatNumber, parseNumber } from '../../utils/formatters.js';
+import {
+  calculateBattleScores,
+  determineBattleVictor,
+  calculateForceStrength,
+  sumModifiers,
+} from '../../systems/battleModifiers.js';
 
 const data = new SlashCommandBuilder()
   .setName('battle')
@@ -450,47 +456,41 @@ async function execute(interaction) {
       });
     }
     
-    // Calculate forces strength
-    const attackerStrength = calculateForceStrength(battle.attacker.forces);
-    const defenderStrength = calculateForceStrength(battle.defender.forces);
+     // Get nation documents to access spirit modifiers
+     const attackerNation = await Nation.findOne({ guildId, name: battle.attacker.nationName });
+     const defenderNation = await Nation.findOne({ guildId, name: battle.defender.nationName });
+     
+     if (!attackerNation || !defenderNation) {
+       return interaction.reply({
+         embeds: [createEmbed({ title: 'Error', description: 'Nation not found for battle participants.', color: config.colors.error })],
+         ephemeral: true,
+       });
+     }
+     
+     // Calculate battle scores with spirit modifiers integrated
+     const scores = calculateBattleScores(battle, attackerNation, defenderNation);
+     
+     battle.rolls = [
+       { 
+         description: 'Attacker Roll', 
+         roll: scores.attackerRoll, 
+         modifier: scores.attackerMods, 
+         result: scores.attackerScore,
+         spiritBonus: scores.attackerSpiritModifier,
+       },
+       { 
+         description: 'Defender Roll', 
+         roll: scores.defenderRoll, 
+         modifier: scores.defenderMods, 
+         result: scores.defenderScore,
+         spiritBonus: scores.defenderSpiritModifier,
+       },
+     ];
     
-    // Calculate modifier totals
-    const attackerMods = sumModifiers(battle.attacker.modifiers);
-    const defenderMods = sumModifiers(battle.defender.modifiers);
-    
-    // Roll dice (d100 for each side)
-    const attackerRoll = Math.floor(Math.random() * 100) + 1;
-    const defenderRoll = Math.floor(Math.random() * 100) + 1;
-    
-    // Calculate final scores
-    const attackerScore = attackerStrength + attackerMods + attackerRoll;
-    const defenderScore = defenderStrength + defenderMods + defenderRoll + 10; // Defender bonus
-    
-    battle.rolls = [
-      { description: 'Attacker Roll', roll: attackerRoll, modifier: attackerMods, result: attackerScore },
-      { description: 'Defender Roll', roll: defenderRoll, modifier: defenderMods, result: defenderScore },
-    ];
-    
-    // Determine victor
-    const scoreDiff = attackerScore - defenderScore;
-    let victor, decisiveness;
-    
-    if (Math.abs(scoreDiff) < 10) {
-      victor = 'draw';
-      decisiveness = 'stalemate';
-    } else if (scoreDiff >= 50) {
-      victor = 'attacker';
-      decisiveness = 'decisive';
-    } else if (scoreDiff >= 10) {
-      victor = 'attacker';
-      decisiveness = 'marginal';
-    } else if (scoreDiff <= -50) {
-      victor = 'defender';
-      decisiveness = 'decisive';
-    } else {
-      victor = 'defender';
-      decisiveness = 'marginal';
-    }
+     // Determine victor
+     const victorDetermination = determineBattleVictor(scores.attackerScore, scores.defenderScore);
+     const victor = victorDetermination.victor;
+     const decisiveness = victorDetermination.decisiveness;
     
     // Calculate casualties
     const baseCasualties = 10 + Math.floor(Math.random() * 20);
@@ -522,14 +522,14 @@ async function execute(interaction) {
     battle.defender.casualtyPercent = defenderCasualtyRate;
     battle.defender.casualties = Math.floor(defenderTotalForces * defenderCasualtyRate / 100);
     
-    // Set result
-    battle.result = {
-      victor,
-      victorNation: victor.includes('attacker') ? battle.attacker.nationName : victor.includes('defender') ? battle.defender.nationName : 'None',
-      decisiveness,
-      attackerScore,
-      defenderScore,
-    };
+     // Set result
+     battle.result = {
+       victor,
+       victorNation: victor.includes('attacker') ? battle.attacker.nationName : victor.includes('defender') ? battle.defender.nationName : 'None',
+       decisiveness,
+       attackerScore: scores.attackerScore,
+       defenderScore: scores.defenderScore,
+     };
     
     battle.status = 'simulated';
     battle.resolvedAt = new Date();
@@ -541,12 +541,12 @@ async function execute(interaction) {
       title: `${victorEmoji} Battle Result: ${battle.name}`,
       description: generateBattleNarrative(battle),
       color: victor.includes('attacker') ? config.colors.error : victor.includes('defender') ? config.colors.success : config.colors.warning,
-      fields: [
-        { name: `${battle.attacker.nationName} (Attacker)`, value: `Score: ${attackerScore}\nCasualties: ${formatNumber(battle.attacker.casualties)} (${attackerCasualtyRate}%)`, inline: true },
-        { name: `${battle.defender.nationName} (Defender)`, value: `Score: ${defenderScore}\nCasualties: ${formatNumber(battle.defender.casualties)} (${defenderCasualtyRate}%)`, inline: true },
-        { name: 'Outcome', value: `**${formatVictor(victor)}**\n${formatDecisiveness(decisiveness)} victory`, inline: false },
-      ],
-      footer: { text: `Rolls: Attacker ${attackerRoll} + ${attackerMods} | Defender ${defenderRoll} + ${defenderMods}` },
+       fields: [
+         { name: `${battle.attacker.nationName} (Attacker)`, value: `Score: ${scores.attackerScore}\nCasualties: ${formatNumber(battle.attacker.casualties)} (${attackerCasualtyRate}%)`, inline: true },
+         { name: `${battle.defender.nationName} (Defender)`, value: `Score: ${scores.defenderScore}\nCasualties: ${formatNumber(battle.defender.casualties)} (${defenderCasualtyRate}%)`, inline: true },
+         { name: 'Outcome', value: `**${formatVictor(victor)}**\n${formatDecisiveness(decisiveness)} victory`, inline: false },
+       ],
+       footer: { text: `Rolls: A${scores.attackerRoll}+${scores.attackerMods}(×${scores.attackerSpiritModifier.toFixed(2)}spirit) | D${scores.defenderRoll}+${scores.defenderMods}(×${scores.defenderSpiritModifier.toFixed(2)}spirit)` },
     });
     
     return interaction.reply({ embeds: [embed] });
