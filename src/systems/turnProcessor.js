@@ -7,6 +7,12 @@ import { turnSummaryEmbed } from '../utils/embeds.js';
 import { formatNumber } from '../utils/formatters.js';
 import { processEventsForTurn, eventEmbed } from './eventSystem.js';
 import { applySpiritEffects } from './spiritSystem.js';
+import { calculateMilitaryPopulationLimit, calculateProductionModifierFromPopulation, calculateIncomeModifierFromPopulation, getPopulationCrisisModifier } from './populationEffects.js';
+import { calculateInfrastructureEffects, degradeInfrastructure } from './infrastructureEffects.js';
+import { calculateWonderEffects } from './wonderEffects.js';
+import { calculateCrisisImpact, calculateRecoveryProgress, isCrisisResolved, calculateCrisisCascades } from './crisisRecovery.js';
+import Infrastructure from '../database/models/Infrastructure.js';
+import Project from '../database/models/Project.js';
 import config from '../config.js';
 
 let scheduledJob = null;
@@ -72,6 +78,7 @@ export async function processTurn(client, guildId) {
     events: [],
     loans: [],
     spirits: [],
+    crises: [],
   };
 
   // Get all nations for this guild
@@ -81,13 +88,19 @@ export async function processTurn(client, guildId) {
     // Calculate spirit modifiers for this nation
     const spiritModifiers = applySpiritEffects(nation);
     
-    // Process currency income (with spirit modifiers)
+    // Calculate population-based modifiers
+    const populationIncomeModifier = calculateIncomeModifierFromPopulation(nation.populationNumber);
+    const populationCrisis = getPopulationCrisisModifier(nation.populationNumber);
+    
+    // Process currency income (with spirit modifiers and population modifiers)
     if (nation.economy.income && nation.economy.income.size > 0) {
       for (const [currency, baseAmount] of nation.economy.income.entries()) {
         if (baseAmount !== 0) {
           // Apply income modifier from spirits
           const incomeModifier = spiritModifiers.incomeModifier || 1;
-          const amount = Math.round(baseAmount * incomeModifier);
+          // Apply population-based modifiers
+          const populationModifiedAmount = incomeModifier * populationIncomeModifier * populationCrisis.incomeModifier;
+          const amount = Math.round(baseAmount * populationModifiedAmount);
           
           if (!nation.economy.currencies) nation.economy.currencies = new Map();
           const current = nation.economy.currencies.get(currency) || 0;
@@ -95,8 +108,8 @@ export async function processTurn(client, guildId) {
           
           if (amount > 0) {
             let incomeText = `${nation.name}: +${formatNumber(amount)} ${currency}`;
-            if (incomeModifier !== 1) {
-              incomeText += ` (${incomeModifier > 1 ? '+' : ''}${Math.round((incomeModifier - 1) * 100)}% from spirits)`;
+            if (populationModifiedAmount !== 1) {
+              incomeText += ` (${populationModifiedAmount > 1 ? '+' : ''}${Math.round((populationModifiedAmount - 1) * 100)}% from modifiers)`;
             }
             changes.income.push(incomeText);
           }
@@ -107,7 +120,7 @@ export async function processTurn(client, guildId) {
             to: { nation: nation._id, nationName: nation.name },
             currency,
             amount,
-            description: incomeModifier !== 1 ? `Turn income (modified by spirits)` : 'Turn income',
+            description: populationModifiedAmount !== 1 ? `Turn income (modified by spirits and population)` : 'Turn income',
             turn: turnNumber,
           });
         }
@@ -129,10 +142,28 @@ export async function processTurn(client, guildId) {
       }
     }
 
+    // Load and calculate infrastructure effects
+    const infrastructureList = await Infrastructure.find({ guildId, nationName: nation.name });
+    const infrastructureEffects = calculateInfrastructureEffects(infrastructureList);
+    
+    // Degrade infrastructure condition
+    for (const infra of infrastructureList) {
+      infra.condition = degradeInfrastructure(infra);
+      infra.effectiveness = (infra.condition / 100);
+      await infra.save();
+    }
+    
+    // Load and calculate completed project/wonder effects
+    const completedProjects = nation.completedProjects || [];
+    const wonderEffects = calculateWonderEffects(completedProjects);
+
     // Process production queue (with production speed modifier)
     if (nation.productionQueue && nation.productionQueue.length > 0) {
       const completedIndices = [];
-      const productionSpeed = spiritModifiers.productionSpeed || 1;
+      // Combine spirit, infrastructure, and wonder production modifiers
+      let productionSpeed = spiritModifiers.productionSpeed || 1;
+      if (infrastructureEffects.productionBonus) productionSpeed += infrastructureEffects.productionBonus;
+      if (wonderEffects.productionModifier) productionSpeed *= wonderEffects.productionModifier;
       
       for (let i = 0; i < nation.productionQueue.length; i++) {
         const item = nation.productionQueue[i];
@@ -166,7 +197,11 @@ export async function processTurn(client, guildId) {
 
     // Process research (with research speed modifier)
     if (nation.research.current && nation.research.turnsRemaining > 0) {
-      const researchSpeed = spiritModifiers.researchSpeed || 1;
+      // Combine spirit, infrastructure, and wonder research modifiers
+      let researchSpeed = spiritModifiers.researchSpeed || 1;
+      if (infrastructureEffects.researchBonus) researchSpeed += infrastructureEffects.researchBonus;
+      if (wonderEffects.researchModifier) researchSpeed *= wonderEffects.researchModifier;
+      
       const turnsToReduce = researchSpeed >= 1 ? Math.ceil(researchSpeed) : 1;
       nation.research.turnsRemaining -= turnsToReduce;
       
@@ -207,6 +242,44 @@ export async function processTurn(client, guildId) {
       const growth = Math.round(nation.populationNumber * (spiritModifiers.populationGrowth / 100));
       nation.populationNumber += growth;
       nation.population = formatPopulation(nation.populationNumber);
+    }
+
+    // Process crisis effects
+    if (nation.economy && nation.economy.activeCrisis) {
+      const crisis = nation.economy.activeCrisis;
+      
+      // Increment turns in crisis
+      crisis.turnsSinceTrigger = (crisis.turnsSinceTrigger || 0) + 1;
+      
+      // Calculate recovery progress
+      crisis.recoveryProgress = calculateRecoveryProgress(0.10, crisis.recoveryAction);
+      
+      // Check if resolved
+      if (isCrisisResolved(crisis.recoveryProgress, crisis.turnsSinceTrigger, crisis.duration)) {
+        // Archive to history
+        nation.economy.crisisHistory = nation.economy.crisisHistory || [];
+        nation.economy.crisisHistory.push({
+          type: crisis.type,
+          startTurn: crisis.startTurn,
+          duration: crisis.turnsSinceTrigger,
+          recoveryAction: crisis.recoveryAction,
+          resolved: true,
+        });
+        nation.economy.activeCrisis = null;
+        changes.crises = changes.crises || [];
+        changes.crises.push(`${nation.name}: Crisis ${crisis.type} resolved after ${crisis.turnsSinceTrigger} turns`);
+      } else {
+        // Apply cascading effects
+        const cascades = calculateCrisisCascades(crisis, nation.populationNumber);
+        const oldStability = nation.stability;
+        nation.stability = Math.max(0, Math.min(100, nation.stability + (cascades.chanceOfRevolution / 10)));
+        
+        // Track crisis impact
+        changes.crises = changes.crises || [];
+        if (nation.stability !== oldStability) {
+          changes.crises.push(`${nation.name}: Crisis affecting stability (${cascades.chanceOfRevolution}% revolution risk)`);
+        }
+      }
     }
 
     await nation.save();
