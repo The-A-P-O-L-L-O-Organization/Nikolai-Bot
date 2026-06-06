@@ -18,6 +18,10 @@ export function applySpiritEffects(nation) {
     stabilityModifier: 0,       // Flat change to stability per turn
     militaryModifier: 1,        // Combat effectiveness (for future use)
     diplomacyBonus: 0,          // Diplomacy bonuses (for future use)
+    diplomacyEspionageBonus: 0,
+    diplomacyTreatyBonus: 0,
+    diplomacyCounterintelBonus: 0,
+    diplomacyPropagandaBonus: 0,
     maintenanceModifier: 1,     // Multiplier for maintenance costs
     populationGrowth: 0,        // Percentage population growth per turn
     resourceModifiers: {},      // Per-resource income multipliers
@@ -57,12 +61,32 @@ export function applySpiritEffects(nation) {
           modifiers.militaryModifier *= (1 + (effect.value || 0) / 100);
           break;
 
-        case 'diplomacy_bonus':
-          // Flat diplomacy bonus
-          modifiers.diplomacyBonus += (effect.value || 0);
-          break;
+         case 'diplomacy_bonus':
+           // Flat diplomacy bonus
+           modifiers.diplomacyBonus += (effect.value || 0);
+           break;
 
-        case 'resource_income':
+         case 'diplomacy_espionage_bonus':
+           modifiers.diplomacyEspionageBonus += (effect.value || 0);
+           break;
+
+         case 'diplomacy_treaty_bonus':
+           modifiers.diplomacyTreatyBonus += (effect.value || 0);
+           break;
+
+         case 'diplomacy_counterintel_bonus':
+           modifiers.diplomacyCounterintelBonus += (effect.value || 0);
+           break;
+
+         case 'diplomacy_propaganda_bonus':
+           modifiers.diplomacyPropagandaBonus += (effect.value || 0);
+           break;
+
+         case 'diplomacy_general_bonus':
+           modifiers.diplomacyBonus += (effect.value || 0);
+           break;
+
+         case 'resource_income':
           // Per-resource modifier
           if (effect.target) {
             const currentMod = modifiers.resourceModifiers[effect.target] || 1;
@@ -139,6 +163,22 @@ export function getSpiritEffectsSummary(nation) {
     }
   }
 
+  if (modifiers.diplomacyEspionageBonus !== 0) {
+    summary.push(`Espionage Bonus: ${modifiers.diplomacyEspionageBonus >= 0 ? '+' : ''}${modifiers.diplomacyEspionageBonus}`);
+  }
+
+  if (modifiers.diplomacyTreatyBonus !== 0) {
+    summary.push(`Treaty Bonus: ${modifiers.diplomacyTreatyBonus >= 0 ? '+' : ''}${modifiers.diplomacyTreatyBonus}`);
+  }
+
+  if (modifiers.diplomacyCounterintelBonus !== 0) {
+    summary.push(`Counterintel Bonus: ${modifiers.diplomacyCounterintelBonus >= 0 ? '+' : ''}${modifiers.diplomacyCounterintelBonus}`);
+  }
+
+  if (modifiers.diplomacyPropagandaBonus !== 0) {
+    summary.push(`Propaganda Bonus: ${modifiers.diplomacyPropagandaBonus >= 0 ? '+' : ''}${modifiers.diplomacyPropagandaBonus}`);
+  }
+
   return summary;
 }
 
@@ -155,6 +195,11 @@ export function validateSpiritEffect(effect) {
     'stability_modifier',
     'military_modifier',
     'diplomacy_bonus',
+    'diplomacy_espionage_bonus',
+    'diplomacy_treaty_bonus',
+    'diplomacy_counterintel_bonus',
+    'diplomacy_propaganda_bonus',
+    'diplomacy_general_bonus',
     'resource_income',
     'maintenance_modifier',
     'population_growth',
