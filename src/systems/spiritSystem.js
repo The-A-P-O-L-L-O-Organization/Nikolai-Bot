@@ -17,7 +17,7 @@ export function applySpiritEffects(nation) {
     researchSpeed: 1,           // Multiplier for research turns
     stabilityModifier: 0,       // Flat change to stability per turn
     militaryModifier: 1,        // Combat effectiveness (for future use)
-    diplomacyBonus: 0,          // Diplomacy bonuses (for future use)
+    diplomacyBonus: 0,          // General diplomacy bonus from spirits
     diplomacyEspionageBonus: 0,
     diplomacyTreatyBonus: 0,
     diplomacyCounterintelBonus: 0,
@@ -61,32 +61,37 @@ export function applySpiritEffects(nation) {
           modifiers.militaryModifier *= (1 + (effect.value || 0) / 100);
           break;
 
-         case 'diplomacy_bonus':
-           // Flat diplomacy bonus
-           modifiers.diplomacyBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_bonus':
+          // Flat diplomacy bonus
+          modifiers.diplomacyBonus += (effect.value || 0);
+          break;
 
-         case 'diplomacy_espionage_bonus':
-           modifiers.diplomacyEspionageBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_espionage_bonus':
+          // Flat diplomacy bonus to espionage operations
+          modifiers.diplomacyEspionageBonus += (effect.value || 0);
+          break;
 
-         case 'diplomacy_treaty_bonus':
-           modifiers.diplomacyTreatyBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_treaty_bonus':
+          // Flat diplomacy bonus to treaty/alliance acceptance
+          modifiers.diplomacyTreatyBonus += (effect.value || 0);
+          break;
 
-         case 'diplomacy_counterintel_bonus':
-           modifiers.diplomacyCounterintelBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_counterintel_bonus':
+          // Flat diplomacy bonus to counterintelligence
+          modifiers.diplomacyCounterintelBonus += (effect.value || 0);
+          break;
 
-         case 'diplomacy_propaganda_bonus':
-           modifiers.diplomacyPropagandaBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_propaganda_bonus':
+          // Flat diplomacy bonus to propaganda operations
+          modifiers.diplomacyPropagandaBonus += (effect.value || 0);
+          break;
 
-         case 'diplomacy_general_bonus':
-           modifiers.diplomacyBonus += (effect.value || 0);
-           break;
+        case 'diplomacy_general_bonus':
+          // General diplomacy bonus applied to all diplomatic actions
+          modifiers.diplomacyBonus += (effect.value || 0);
+          break;
 
-         case 'resource_income':
+        case 'resource_income':
           // Per-resource modifier
           if (effect.target) {
             const currentMod = modifiers.resourceModifiers[effect.target] || 1;
@@ -216,6 +221,11 @@ export function validateSpiritEffect(effect) {
 
   // Resource income requires a target
   if (effect.type === 'resource_income' && !effect.target) {
+    return false;
+  }
+
+  // Validate that value is numeric if present
+  if (effect.value !== undefined && effect.value !== null && typeof effect.value !== 'number') {
     return false;
   }
 
