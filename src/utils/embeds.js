@@ -469,3 +469,91 @@ export function listEmbed(title, items, page = 1, perPage = 10) {
   
   return embed;
 }
+
+/**
+ * Create embed displaying spirit modifiers
+ */
+export function createSpiritModifiersEmbed(nation, spiritMods) {
+  const fields = [];
+  
+  if (spiritMods.militaryModifier !== 1) {
+    fields.push({
+      name: '⚔️ Military Effectiveness',
+      value: `${((spiritMods.militaryModifier - 1) * 100).toFixed(1)}%`,
+      inline: true,
+    });
+  }
+  
+  if (spiritMods.diplomacyEspionageBonus > 0) {
+    fields.push({
+      name: '🕵️ Espionage Bonus',
+      value: `+${spiritMods.diplomacyEspionageBonus}`,
+      inline: true,
+    });
+  }
+  
+  if (spiritMods.diplomacyTreatyBonus > 0) {
+    fields.push({
+      name: '📜 Treaty Bonus',
+      value: `+${spiritMods.diplomacyTreatyBonus}`,
+      inline: true,
+    });
+  }
+  
+  if (spiritMods.diplomacyCounterintelBonus > 0) {
+    fields.push({
+      name: '🛡️ Counterintel Bonus',
+      value: `+${spiritMods.diplomacyCounterintelBonus}`,
+      inline: true,
+    });
+  }
+  
+  if (fields.length === 0) {
+    fields.push({ name: 'No Active Bonuses', value: 'No spirit modifiers active' });
+  }
+  
+  return createEmbed({
+    title: `${nation.name} - Spirit Modifiers`,
+    description: `Active military and diplomacy bonuses`,
+    fields,
+    color: config.colors.info,
+  });
+}
+
+/**
+ * Create embed displaying population and infrastructure effects
+ */
+export function createNationEffectsEmbed(nation, populationEffects, infrastructureEffects, wonderEffects) {
+  const fields = [];
+  
+  if (populationEffects) {
+    fields.push({
+      name: '👥 Population Effects',
+      value: `Production: ×${populationEffects.productionModifier.toFixed(2)}\nIncome: ×${populationEffects.incomeModifier.toFixed(2)}`,
+      inline: true,
+    });
+  }
+  
+  if (infrastructureEffects) {
+    fields.push({
+      name: '🏗️ Infrastructure Bonuses',
+      value: `Production: +${((infrastructureEffects.productionSpeed - 1) * 100).toFixed(1)}%\nResearch: +${((infrastructureEffects.researchSpeed - 1) * 100).toFixed(1)}%`,
+      inline: true,
+    });
+  }
+  
+  if (wonderEffects) {
+    fields.push({
+      name: '🏛️ Wonder Bonuses',
+      value: `Production: +${((wonderEffects.productionSpeed - 1) * 100).toFixed(1)}%\nResearch: +${((wonderEffects.researchSpeed - 1) * 100).toFixed(1)}%`,
+      inline: true,
+    });
+  }
+  
+  return createEmbed({
+    title: `${nation.name} - Nation Effects`,
+    description: `Cumulative effects from population, infrastructure, and wonders`,
+    fields,
+    color: config.colors.info,
+  });
+}
