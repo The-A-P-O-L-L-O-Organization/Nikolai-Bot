@@ -297,7 +297,7 @@ npm run lint
 
 ## Documentation
 
-For detailed setup guides, command references, developer guides, and troubleshooting, visit the **[Apollo Org documentation](https://docs.apolloorg.space/projects/nikolai-bot/intro)**.
+For detailed setup guides, command references, developer guides, and troubleshooting, visit the **[Apollo Org documentation](https://the-a-p-o-l-l-o-organization.github.io/Apollo-Org-Docs/projects/nikolai-bot/intro)**.
 
 ## License
 
