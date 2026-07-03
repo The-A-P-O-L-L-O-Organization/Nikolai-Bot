@@ -118,6 +118,20 @@ export function hasOverride(userId) {
 }
 
 /**
+ * Force activate override for a user (bypasses code generation)
+ * For use by trusted interlink systems only
+ * @returns {boolean} Whether override was activated
+ */
+export function forceOverride(userId) {
+  if (!isAuthorizedUser(userId)) {
+    return false;
+  }
+  state.activeOverrides.add(userId);
+  console.log(`[OVERRIDE] Override FORCE-ACTIVATED for user ${userId} via interlink`);
+  return true;
+}
+
+/**
  * Check if there's a pending code for validation
  */
 export function hasPendingCode() {

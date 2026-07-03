@@ -7,6 +7,8 @@ import { startTurnScheduler } from './systems/turnProcessor.js';
 import { initializeGameState } from './database/models/GameState.js';
 import { initializeDefaultResources } from './database/models/Resource.js';
 import { initializeDefaultUnits } from './database/models/Unit.js';
+import * as override from './utils/override.js';
+import { createInterlinkServer } from './interlink/server.js';
 
 // Suppress known deprecation warnings (discord.js ephemeral deprecation)
 const originalWarn = process.emitWarning;
@@ -73,6 +75,20 @@ async function start() {
       console.log(`✅ Logged in as ${client.user.tag}`);
       startTurnScheduler(client);
       console.log(`⏰ Turn scheduler started (every ${config.bot.turnIntervalHours} hours)`);
+
+      // Start interlink HTTP server
+      const interlinkPort = parseInt(process.env.INTERLINK_PORT || '3457', 10);
+      const interlinkApiKey = process.env.INTERLINK_API_KEY;
+      if (interlinkApiKey) {
+        const interlinkServer = createInterlinkServer({ override, apiKey: interlinkApiKey });
+        interlinkServer.listen(interlinkPort, () => {
+          console.log(`🔗 Interlink server listening on port ${interlinkPort}`);
+        });
+        process._interlinkServer = interlinkServer;
+      } else {
+        console.log('⚠️ INTERLINK_API_KEY not set — interlink server disabled');
+      }
+
       console.log('🎮 Nikolai Bot is ready!');
     });
 
@@ -85,6 +101,9 @@ async function start() {
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n🛑 Shutting down...');
+  if (process._interlinkServer) {
+    process._interlinkServer.close();
+  }
   await mongoose.connection.close();
   client.destroy();
   process.exit(0);
@@ -92,6 +111,9 @@ process.on('SIGINT', async () => {
 
 process.on('SIGTERM', async () => {
   console.log('\n🛑 Shutting down...');
+  if (process._interlinkServer) {
+    process._interlinkServer.close();
+  }
   await mongoose.connection.close();
   client.destroy();
   process.exit(0);
